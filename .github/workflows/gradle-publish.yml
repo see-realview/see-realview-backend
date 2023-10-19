@@ -32,10 +32,25 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Build with Gradle
-      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v2
       with:
-        arguments: build
+        path: ~/see-realview/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle
+
+    - name: Build and Test
+      run: ./gradlew clean build
+      working-directory: ./see-realview
+      
+    - name: Run Spring Boot App for 30 seconds
+      run: |
+        ./gradlew bootRun &
+        APP_PID=$!
+        sleep 30
+        kill $APP_PID
+      continue-on-error: false
+      working-directory: ./see-realview
 
     # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
     # the publishing section of your build.gradle
