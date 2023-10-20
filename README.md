@@ -17,7 +17,22 @@
 </br>
 
 ## 설치 방법
-- 업데이트 예정
+> Require: JDK 17, Spring 3.1.4
+
+1. clone project
+```
+$ git clone https://github.com/Step3-kakao-tech-campus/Team5_BE.git
+$ cd  Team5_BE
+$ cd sunsu-wedding
+```
+
+2. build and execute
+```
+$ ./gradlew build
+$ cd build
+$ cd libs
+$ java -jar sunsu-wedding-0.0.1-SNAPSHOT.jar
+```
 
 </br>
 
@@ -42,11 +57,11 @@
 </br>
 
 ## 코드 유지 관리자
-|    | 문석준                     | 이창욱                      | 이현빈                        | 진예규                           |
-|:--:|:--------------------------:|:---------------------------:|:-----------------------------:|:--------------------------------:|
-|E-Mail| seokjun0915@icloud.com   | ckddnr5527@gmail.com        | blackhblee@gmail.com          | jyg3485@naver.com                |
+|      | **문석준**                 | **이창욱**                  | **이현빈**                    | **진예규**                       |
+|:----:|:--------------------------:|:---------------------------:|:-----------------------------:|:--------------------------------:|
+|E-Mail| seokjun0915@icloud.com     | ckddnr5527@gmail.com        | blackhblee@gmail.com          | jyg3485@naver.com                |
 |GitHub| [seokwns](https://github.com/seokwns) | [ichanguk](https://github.com/ichanguk) | [blackhblee](https://github.com/blackhblee) | [teriyakki-jin](https://github.com/teriyakki-jin) |
-|| <img src="https://github.com/seokwns.png" width=100px> | <img src="https://github.com/ichanguk.png" width=100px> | <img src="https://github.com/blackhblee.png" width=100px> | <img src="https://github.com/teriyakki-jin.png" width=100px> |
+|      | <img src="https://github.com/seokwns.png" width=100px> | <img src="https://github.com/ichanguk.png" width=100px> | <img src="https://github.com/blackhblee.png" width=100px> | <img src="https://github.com/teriyakki-jin.png" width=100px> |
 
 </br>
 
