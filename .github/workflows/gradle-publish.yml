@@ -15,18 +15,12 @@ on:
 
 env:
   KAKAO_SEARCH_KEY: ${{secrets.KAKAO_SEARCH_KEY}}
-  NAVER_SEARCH_ID: ${{secrets.NAVER_SEARCH_ID}};
+  NAVER_SEARCH_ID: ${{secrets.NAVER_SEARCH_ID}}
   NAVER_SEARCH_SECRET: ${{secrets.NAVER_SEARCH_SECRET}}
-
-permissions:
-  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
     - id: 'auth'
