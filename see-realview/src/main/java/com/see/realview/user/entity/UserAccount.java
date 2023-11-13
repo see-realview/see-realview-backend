@@ -27,6 +27,9 @@ public class UserAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name", length = 20, nullable = false)
+    private String name;
+
     @Column(name = "email", length = 100, nullable = false)
     private String email;
 
@@ -44,11 +47,12 @@ public class UserAccount {
     private Boolean isActive;
 
     @Builder
-    public UserAccount(Long id, String email, String password, Role role, LocalDateTime createdAt) {
+    public UserAccount(Long id, String name, String email, String password, LocalDateTime createdAt) {
         this.id = id;
+        this.name = name;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.role = Role.USER;
         this.createdAt = (createdAt == null? LocalDateTime.now() : createdAt);
     }
 }
