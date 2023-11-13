@@ -4,6 +4,7 @@ import com.see.realview.core.exception.BadRequestException;
 import com.see.realview.core.exception.BaseException;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
+import com.see.realview.user.dto.response.TokenPair;
 import com.see.realview.user.entity.UserAccount;
 import com.see.realview.user.repository.UserAccountJPARepository;
 import com.see.realview.user.repository.UserAccountRepositoryImpl;
@@ -39,11 +40,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void login(LoginRequest request) {
-        UserAccount userAccount = userAccountRepository.findUserAccountByEmail(request.email())
-                .orElseThrow(() -> new BadRequestException(BaseException.EMAIL_NOT_FOUND));
+    public TokenPair login(LoginRequest request) {
+        UserAccount userAccount = findUserAccountByEmail(request);
 
         checkPassword(request, userAccount);
+
+        return new TokenPair("TODO", "TODO");
     }
 
     private void checkEmailAlreadyExist(RegisterRequest request) {
@@ -63,5 +65,10 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(request.password(), userAccount.getPassword())) {
             throw new BadRequestException(BaseException.INVALID_PASSWORD);
         }
+    }
+
+    private UserAccount findUserAccountByEmail(LoginRequest request) {
+        return userAccountRepository.findUserAccountByEmail(request.email())
+                .orElseThrow(() -> new BadRequestException(BaseException.EMAIL_NOT_FOUND));
     }
 }
