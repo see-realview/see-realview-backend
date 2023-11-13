@@ -2,10 +2,8 @@ package com.see.realview.core.exception;
 
 import com.see.realview.core.response.ErrorData;
 import com.see.realview.core.response.ResponseData;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@RequiredArgsConstructor
 public class BadRequestException extends RuntimeException implements CustomException {
 
     private final BaseException exception;
