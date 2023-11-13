@@ -2,6 +2,7 @@ package com.see.realview.user.service;
 
 import com.see.realview.core.exception.BadRequestException;
 import com.see.realview.core.exception.BaseException;
+import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
 import com.see.realview.user.entity.UserAccount;
 import com.see.realview.user.repository.UserAccountJPARepository;
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional
     public void register(RegisterRequest request) {
         checkEmailAlreadyExist(request);
         checkEqualPassword(request);
@@ -36,6 +38,14 @@ public class UserServiceImpl implements UserService {
         userAccountJPARepository.save(userAccount);
     }
 
+    @Override
+    public void login(LoginRequest request) {
+        UserAccount userAccount = userAccountRepository.findUserAccountByEmail(request.email())
+                .orElseThrow(() -> new BadRequestException(BaseException.EMAIL_NOT_FOUND));
+
+        checkPassword(request, userAccount);
+    }
+
     private void checkEmailAlreadyExist(RegisterRequest request) {
         userAccountRepository.findUserAccountByEmail(request.email())
                 .ifPresent(user -> {
@@ -46,6 +56,12 @@ public class UserServiceImpl implements UserService {
     private static void checkEqualPassword(RegisterRequest request) {
         if (!request.password().equals(request.password2())) {
             throw new BadRequestException(BaseException.PASSWORD_NOT_EQUALS);
+        }
+    }
+
+    private void checkPassword(LoginRequest request, UserAccount userAccount) {
+        if (!passwordEncoder.matches(request.password(), userAccount.getPassword())) {
+            throw new BadRequestException(BaseException.INVALID_PASSWORD);
         }
     }
 }

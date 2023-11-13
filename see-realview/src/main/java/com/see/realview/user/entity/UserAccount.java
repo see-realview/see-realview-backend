@@ -54,5 +54,6 @@ public class UserAccount {
         this.password = password;
         this.role = Role.USER;
         this.createdAt = (createdAt == null? LocalDateTime.now() : createdAt);
+        this.isActive = true;
     }
 }
