@@ -5,10 +5,10 @@ import com.see.realview.core.response.ResponseData;
 import org.springframework.http.HttpStatus;
 
 public class UnauthorizedException extends RuntimeException implements CustomException {
-    private final BaseException exception;
+    private final ExceptionStatus exception;
 
 
-    public UnauthorizedException(BaseException exception) {
+    public UnauthorizedException(ExceptionStatus exception) {
         this.exception = exception;
     }
 

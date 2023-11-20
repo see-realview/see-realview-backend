@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 @Getter
-public enum ExceptionCode {
+public enum ExceptionStatus {
     // 공통 에러 1000번
 
     // 유저 에러 2000번

@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 
 public class NotFoundException extends RuntimeException implements CustomException {
 
-    private final BaseException exception;
+    private final ExceptionStatus exception;
 
 
-    public NotFoundException(BaseException exception) {
+    public NotFoundException(ExceptionStatus exception) {
         this.exception = exception;
     }
 

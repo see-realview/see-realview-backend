@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 
 public class ServerException extends RuntimeException implements CustomException {
 
-    private final BaseException exception;
+    private final ExceptionStatus exception;
 
 
-    public ServerException(BaseException exception) {
+    public ServerException(ExceptionStatus exception) {
         this.exception = exception;
     }
 

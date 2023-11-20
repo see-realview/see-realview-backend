@@ -1,21 +1,20 @@
 package com.see.realview.user.service;
 
 import com.see.realview.core.exception.BadRequestException;
-import com.see.realview.core.exception.BaseException;
+import com.see.realview.core.exception.ExceptionStatus;
+import com.see.realview.token.entity.TokenPair;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
-import com.see.realview.user.dto.response.TokenPair;
 import com.see.realview.user.entity.UserAccount;
 import com.see.realview.user.repository.UserAccountJPARepository;
 import com.see.realview.user.repository.UserAccountRepositoryImpl;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserAccountRepositoryImpl userAccountRepository;
@@ -23,6 +22,14 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+
+    public UserServiceImpl(@Autowired UserAccountRepositoryImpl userAccountRepository,
+                           @Autowired UserAccountJPARepository userAccountJPARepository,
+                           @Autowired PasswordEncoder passwordEncoder) {
+        this.userAccountRepository = userAccountRepository;
+        this.userAccountJPARepository = userAccountJPARepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional
@@ -51,24 +58,24 @@ public class UserServiceImpl implements UserService {
     private void checkEmailAlreadyExist(RegisterRequest request) {
         userAccountRepository.findUserAccountByEmail(request.email())
                 .ifPresent(user -> {
-                    throw new BadRequestException(BaseException.EMAIL_ALREADY_EXIST);
+                    throw new BadRequestException(ExceptionStatus.EMAIL_ALREADY_EXIST);
                 });
     }
 
     private static void checkEqualPassword(RegisterRequest request) {
         if (!request.password().equals(request.password2())) {
-            throw new BadRequestException(BaseException.PASSWORD_NOT_EQUALS);
+            throw new BadRequestException(ExceptionStatus.PASSWORD_NOT_EQUALS);
         }
     }
 
     private void checkPassword(LoginRequest request, UserAccount userAccount) {
         if (!passwordEncoder.matches(request.password(), userAccount.getPassword())) {
-            throw new BadRequestException(BaseException.INVALID_PASSWORD);
+            throw new BadRequestException(ExceptionStatus.INVALID_PASSWORD);
         }
     }
 
     private UserAccount findUserAccountByEmail(LoginRequest request) {
         return userAccountRepository.findUserAccountByEmail(request.email())
-                .orElseThrow(() -> new BadRequestException(BaseException.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(ExceptionStatus.EMAIL_NOT_FOUND));
     }
 }

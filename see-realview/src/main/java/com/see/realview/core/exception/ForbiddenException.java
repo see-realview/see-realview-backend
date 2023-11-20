@@ -5,10 +5,10 @@ import com.see.realview.core.response.ResponseData;
 import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends RuntimeException implements CustomException {
-    private final BaseException exception;
+    private final ExceptionStatus exception;
 
 
-    public ForbiddenException(BaseException exception) {
+    public ForbiddenException(ExceptionStatus exception) {
         this.exception = exception;
     }
 

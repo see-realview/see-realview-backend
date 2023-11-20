@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 
 public class BadRequestException extends RuntimeException implements CustomException {
 
-    private final BaseException exception;
+    private final ExceptionStatus exception;
 
 
-    public BadRequestException(BaseException exception) {
+    public BadRequestException(ExceptionStatus exception) {
         this.exception = exception;
     }
 
