@@ -1,6 +1,5 @@
 package com.see.realview.token.entity;
 
-import com.see.realview.token.dto.TokenPair;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +13,11 @@ import org.springframework.data.redis.core.RedisHash;
 public class Token {
 
     @Id
-    private String email;
+    private Long userAccountId;
 
     private TokenPair tokenPair;
+
+    public Boolean equals(String accessToken, String refreshToken) {
+        return tokenPair.access().equals(accessToken) && tokenPair.refresh().equals(refreshToken);
+    }
 }

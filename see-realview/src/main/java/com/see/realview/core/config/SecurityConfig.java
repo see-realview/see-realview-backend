@@ -2,6 +2,9 @@ package com.see.realview.core.config;
 
 import com.see.realview.core.security.CorsConfig;
 import com.see.realview.core.security.CustomSecurityFilterManager;
+import com.see.realview.core.security.JwtProvider;
+import com.see.realview.token.service.TokenServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +20,17 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
+
+    private final JwtProvider jwtProvider;
+
+    private final TokenServiceImpl tokenService;
+
+
+    public SecurityConfig(@Autowired JwtProvider jwtProvider,
+                          @Autowired TokenServiceImpl tokenService) {
+        this.jwtProvider = jwtProvider;
+        this.tokenService = tokenService;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -37,7 +51,7 @@ public class SecurityConfig {
 
         http.httpBasic(HttpBasicConfigurer::disable);
 
-        http.apply(new CustomSecurityFilterManager());
+        http.apply(new CustomSecurityFilterManager(jwtProvider, tokenService));
 
         http.exceptionHandling((exceptionHandling) ->
                 exceptionHandling.authenticationEntryPoint((request, response, authException) -> {

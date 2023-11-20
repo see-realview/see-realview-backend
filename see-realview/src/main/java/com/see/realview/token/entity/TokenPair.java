@@ -1,4 +1,4 @@
-package com.see.realview.token.dto;
+package com.see.realview.token.entity;
 
 public record TokenPair(
         String access,

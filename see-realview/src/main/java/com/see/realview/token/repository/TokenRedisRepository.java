@@ -2,8 +2,11 @@ package com.see.realview.token.repository;
 
 import com.see.realview.token.entity.Token;
 
+import java.util.Optional;
+
 public interface TokenRedisRepository {
 
-    Token findTokenByEmail(String email);
+    Optional<Token> findTokenById(Long id);
 
+    void deleteById(Long id);
 }

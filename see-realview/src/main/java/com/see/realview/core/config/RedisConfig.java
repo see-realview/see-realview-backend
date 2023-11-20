@@ -40,7 +40,7 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<?,?> tokenRedisTemplate() {
-        RedisTemplate<String, Token> redisTemplate = new RedisTemplate<>();
+        RedisTemplate<Long, Token> redisTemplate = new RedisTemplate<>();
 
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
