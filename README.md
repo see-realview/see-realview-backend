@@ -17,13 +17,15 @@
 </br>
 
 ## 설치 방법
-> Require: JDK 17, Spring 3.1.4
+> Require
+> - JDK 17
+> - Spring 3.1.4
 
 1. clone project
 ```
-$ git clone https://github.com/Step3-kakao-tech-campus/Team5_BE.git
-$ cd  Team5_BE
-$ cd sunsu-wedding
+$ git clone https://github.com/see-realview/see-realview-backend.git
+$ cd see-realview-backend
+$ cd see-realview
 ```
 
 2. build and execute
@@ -31,7 +33,7 @@ $ cd sunsu-wedding
 $ ./gradlew build
 $ cd build
 $ cd libs
-$ java -jar sunsu-wedding-0.0.1-SNAPSHOT.jar
+$ java -jar see-realview-0.0.1-SNAPSHOT.jar
 ```
 
 </br>
