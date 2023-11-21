@@ -59,7 +59,7 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 </br>
 
 ## 변경 로그 소개
-- 2023.10.19 : 백엔드 프로젝트 초기 설정 #7
+- 2023.10.19 : 백엔드 프로젝트 초기 설정 [#7](https://github.com/see-realview/see-realview-backend/issues/7)
 
 </br>
 
