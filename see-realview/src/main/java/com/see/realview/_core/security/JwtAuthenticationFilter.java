@@ -1,11 +1,11 @@
-package com.see.realview.core.security;
+package com.see.realview._core.security;
 
-import com.see.realview.core.exception.BadRequestException;
-import com.see.realview.core.exception.ExceptionStatus;
-import com.see.realview.core.exception.UnauthorizedException;
-import com.see.realview.token.entity.Token;
-import com.see.realview.token.service.TokenServiceImpl;
-import com.see.realview.user.entity.UserAccount;
+import com.see.realview._core.exception.client.BadRequestException;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.UnauthorizedException;
+import com.see.realview.domain.token.entity.Token;
+import com.see.realview.domain.token.service.TokenServiceImpl;
+import com.see.realview.domain.user.entity.UserAccount;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,6 +43,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         if (accessHeader == null) {
             chain.doFilter(request, response);
+            return;
         }
 
         Long userAccountId = jwtProvider.verifyAccessToken(accessHeader);
@@ -63,7 +64,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             log.debug("리프래시 토큰을 이용한 토큰 생성. id = " + userAccountId);
             chain.doFilter(request, response);
         }
-
         else {
             createAuthentication(userAccountId);
             chain.doFilter(request, response);

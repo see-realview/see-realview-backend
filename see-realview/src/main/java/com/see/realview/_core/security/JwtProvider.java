@@ -1,8 +1,8 @@
-package com.see.realview.core.security;
+package com.see.realview._core.security;
 
-import com.see.realview.core.exception.ExceptionStatus;
-import com.see.realview.core.exception.ServerException;
-import com.see.realview.core.exception.UnauthorizedException;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.server.ServerException;
+import com.see.realview._core.exception.client.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;

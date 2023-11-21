@@ -1,6 +1,11 @@
-package com.see.realview.core.exception;
+package com.see.realview._core.exception;
 
-import com.see.realview.core.response.ResponseData;
+import com.see.realview._core.exception.client.BadRequestException;
+import com.see.realview._core.exception.client.ForbiddenException;
+import com.see.realview._core.exception.client.NotFoundException;
+import com.see.realview._core.exception.client.UnauthorizedException;
+import com.see.realview._core.exception.server.ServerException;
+import com.see.realview._core.response.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

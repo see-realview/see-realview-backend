@@ -1,7 +1,7 @@
-package com.see.realview.core.utils;
+package com.see.realview._core.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.see.realview.core.exception.CustomException;
+import com.see.realview._core.exception.CustomException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

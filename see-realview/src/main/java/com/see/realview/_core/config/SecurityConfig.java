@@ -1,13 +1,13 @@
-package com.see.realview.core.config;
+package com.see.realview._core.config;
 
-import com.see.realview.core.exception.ExceptionStatus;
-import com.see.realview.core.exception.ForbiddenException;
-import com.see.realview.core.exception.UnauthorizedException;
-import com.see.realview.core.security.CorsConfig;
-import com.see.realview.core.security.CustomSecurityFilterManager;
-import com.see.realview.core.security.JwtProvider;
-import com.see.realview.core.utils.ExceptionResponseWriter;
-import com.see.realview.token.service.TokenServiceImpl;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.ForbiddenException;
+import com.see.realview._core.exception.client.UnauthorizedException;
+import com.see.realview._core.security.CorsConfig;
+import com.see.realview._core.security.CustomSecurityFilterManager;
+import com.see.realview._core.security.JwtProvider;
+import com.see.realview._core.utils.ExceptionResponseWriter;
+import com.see.realview.domain.token.service.TokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,10 +76,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers(
-                                new AntPathRequestMatcher("/api/user/register"),
-                                new AntPathRequestMatcher("/api/user/login")
-                        ).authenticated()
-                        .anyRequest().permitAll()
+                                new AntPathRequestMatcher("/user/register"),
+                                new AntPathRequestMatcher("/user/login"),
+                                new AntPathRequestMatcher("/search/**")
+                        ).permitAll()
+                        .anyRequest().authenticated()
         );
 
         return http.build();

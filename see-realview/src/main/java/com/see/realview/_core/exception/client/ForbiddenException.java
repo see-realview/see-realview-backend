@@ -1,15 +1,16 @@
-package com.see.realview.core.exception;
+package com.see.realview._core.exception.client;
 
-import com.see.realview.core.response.ErrorData;
-import com.see.realview.core.response.ResponseData;
+import com.see.realview._core.exception.CustomException;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.response.ErrorData;
+import com.see.realview._core.response.ResponseData;
 import org.springframework.http.HttpStatus;
 
-public class NotFoundException extends RuntimeException implements CustomException {
-
+public class ForbiddenException extends RuntimeException implements CustomException {
     private final ExceptionStatus exception;
 
 
-    public NotFoundException(ExceptionStatus exception) {
+    public ForbiddenException(ExceptionStatus exception) {
         this.exception = exception;
     }
 

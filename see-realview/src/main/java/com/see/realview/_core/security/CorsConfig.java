@@ -1,4 +1,4 @@
-package com.see.realview.core.security;
+package com.see.realview._core.security;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;

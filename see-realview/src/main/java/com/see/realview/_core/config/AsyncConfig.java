@@ -1,4 +1,4 @@
-package com.see.realview.core.config;
+package com.see.realview._core.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;

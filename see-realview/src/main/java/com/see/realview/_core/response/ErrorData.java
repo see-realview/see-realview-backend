@@ -1,4 +1,4 @@
-package com.see.realview.core.response;
+package com.see.realview._core.response;
 
 public record ErrorData(
         int code,

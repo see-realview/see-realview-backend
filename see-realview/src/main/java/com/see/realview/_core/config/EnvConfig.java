@@ -1,4 +1,4 @@
-package com.see.realview.core.config;
+package com.see.realview._core.config;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.PropertiesPropertySource;

@@ -1,4 +1,4 @@
-package com.see.realview.core.exception;
+package com.see.realview._core.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

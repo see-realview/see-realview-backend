@@ -1,4 +1,4 @@
-package com.see.realview.core.config;
+package com.see.realview._core.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

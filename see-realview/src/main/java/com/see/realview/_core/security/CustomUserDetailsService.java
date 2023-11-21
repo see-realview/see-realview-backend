@@ -1,9 +1,9 @@
-package com.see.realview.core.security;
+package com.see.realview._core.security;
 
-import com.see.realview.core.exception.ExceptionStatus;
-import com.see.realview.core.exception.NotFoundException;
-import com.see.realview.user.entity.UserAccount;
-import com.see.realview.user.repository.UserAccountRepository;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.NotFoundException;
+import com.see.realview.domain.user.entity.UserAccount;
+import com.see.realview.domain.user.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
