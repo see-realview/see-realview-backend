@@ -1,6 +1,6 @@
 package com.see.realview;
 
-import com.see.realview.core.config.EnvConfig;
+import com.see.realview._core.config.EnvConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
