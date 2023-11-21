@@ -1,7 +1,7 @@
 package com.see.realview.user.service;
 
-import com.see.realview.core.exception.BadRequestException;
-import com.see.realview.core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.BadRequestException;
+import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview.token.entity.TokenPair;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;

@@ -1,6 +1,6 @@
 package com.see.realview.user.controller;
 
-import com.see.realview.core.response.Response;
+import com.see.realview._core.response.Response;
 import com.see.realview.token.entity.TokenPair;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;

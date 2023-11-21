@@ -7,7 +7,7 @@ import com.see.realview._core.security.CorsConfig;
 import com.see.realview._core.security.CustomSecurityFilterManager;
 import com.see.realview._core.security.JwtProvider;
 import com.see.realview._core.utils.ExceptionResponseWriter;
-import com.see.realview.domain.token.service.TokenServiceImpl;
+import com.see.realview.token.service.TokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

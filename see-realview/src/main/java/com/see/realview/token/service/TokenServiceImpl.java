@@ -1,7 +1,7 @@
 package com.see.realview.token.service;
 
-import com.see.realview.core.exception.ExceptionStatus;
-import com.see.realview.core.exception.NotFoundException;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview.token.entity.Token;
 import com.see.realview.token.repository.TokenRedisRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

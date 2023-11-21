@@ -1,6 +1,6 @@
 package com.see.realview._core.security;
 
-import com.see.realview.domain.token.service.TokenServiceImpl;
+import com.see.realview.token.service.TokenServiceImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;

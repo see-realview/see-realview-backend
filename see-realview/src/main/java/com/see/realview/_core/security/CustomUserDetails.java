@@ -1,6 +1,6 @@
 package com.see.realview._core.security;
 
-import com.see.realview.domain.user.entity.UserAccount;
+import com.see.realview.user.entity.UserAccount;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
