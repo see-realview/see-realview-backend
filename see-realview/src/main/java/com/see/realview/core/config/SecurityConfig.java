@@ -1,8 +1,12 @@
 package com.see.realview.core.config;
 
+import com.see.realview.core.exception.ExceptionStatus;
+import com.see.realview.core.exception.ForbiddenException;
+import com.see.realview.core.exception.UnauthorizedException;
 import com.see.realview.core.security.CorsConfig;
 import com.see.realview.core.security.CustomSecurityFilterManager;
 import com.see.realview.core.security.JwtProvider;
+import com.see.realview.core.utils.ExceptionResponseWriter;
 import com.see.realview.token.service.TokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,11 +29,15 @@ public class SecurityConfig {
 
     private final TokenServiceImpl tokenService;
 
+    private final ExceptionResponseWriter responseWriter;
+
 
     public SecurityConfig(@Autowired JwtProvider jwtProvider,
-                          @Autowired TokenServiceImpl tokenService) {
+                          @Autowired TokenServiceImpl tokenService,
+                          @Autowired ExceptionResponseWriter responseWriter) {
         this.jwtProvider = jwtProvider;
         this.tokenService = tokenService;
+        this.responseWriter = responseWriter;
     }
 
     @Bean
@@ -55,13 +63,13 @@ public class SecurityConfig {
 
         http.exceptionHandling((exceptionHandling) ->
                 exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
-
+                    responseWriter.write(response, new UnauthorizedException(ExceptionStatus.UNAUTHORIZED));
                 })
         );
 
         http.exceptionHandling((exceptionHandling) ->
                 exceptionHandling.accessDeniedHandler((request, response, accessDeniedException) -> {
-
+                    responseWriter.write(response, new ForbiddenException(ExceptionStatus.FORBIDDEN));
                 })
         );
 
