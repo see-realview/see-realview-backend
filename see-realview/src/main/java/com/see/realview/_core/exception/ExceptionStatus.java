@@ -22,7 +22,13 @@ public enum ExceptionStatus {
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2101, "액세스 토큰이 만료되었습니다."),
     TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 2102, "토큰이 존재하지 않습니다."),
     REFRESH_TOKEN_REQUIRED(HttpStatus.UNAUTHORIZED, 2103, "리프래시 토큰이 존재하지 않습니다"),
-    TOKEN_PAIR_NOT_MATCH(HttpStatus.UNAUTHORIZED, 2104, "토큰쌍이 일치하지 않습니다.")
+    TOKEN_PAIR_NOT_MATCH(HttpStatus.UNAUTHORIZED, 2104, "토큰쌍이 일치하지 않습니다."),
+
+    // 네이버 검색 에러 3000번
+    NAVER_SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 3000, "네이버 검색 요청 중 에러가 발생했습니다."),
+
+    // 포스트 분석 에러 4000번
+    POST_PARSE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, 4000, "포스트 파싱 중에 에러가 발생했습니다.")
     ;
 
     private final HttpStatus status;
