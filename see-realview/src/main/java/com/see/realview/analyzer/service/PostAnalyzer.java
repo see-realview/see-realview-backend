@@ -20,23 +20,23 @@ public class PostAnalyzer {
 
     private final HtmlParser htmlParser;
 
-    private final TextAnalyzer textAnalyzer;
+    private final TextParser textParser;
 
     private final GoogleVisionOCR googleVisionOCR;
 
 
     public PostAnalyzer(@Autowired AnalyzeRequestConverter requestConverter,
                         @Autowired HtmlParser htmlParser,
-                        @Autowired TextAnalyzer textAnalyzer,
+                        @Autowired TextParser textParser,
                         @Autowired GoogleVisionOCR googleVisionOCR) {
         this.requestConverter = requestConverter;
         this.htmlParser = htmlParser;
-        this.textAnalyzer = textAnalyzer;
+        this.textParser = textParser;
         this.googleVisionOCR = googleVisionOCR;
     }
 
     public AnalyzeResponse analyze(NaverSearchResponse response) {
-        List<AnalyzeRequest> analyzeRequests = requestConverter.converte(response);
+        List<AnalyzeRequest> analyzeRequests = requestConverter.convert(response);
 
         AtomicInteger count = new AtomicInteger();
         List<ImageParseRequest> imageParseRequests = analyzeRequests
@@ -46,7 +46,7 @@ public class PostAnalyzer {
                     Elements elements = htmlParser.parse(request);
 
                     String text = elements.text();
-                    Boolean advertisement = textAnalyzer.analyze(text);
+                    Boolean advertisement = textParser.analyze(text);
                     if (advertisement) {
                         return new ImageParseRequest(request, false, null);
                     }

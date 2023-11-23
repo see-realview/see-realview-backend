@@ -3,7 +3,7 @@ package com.see.realview.analyzer.service;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TextAnalyzer {
+public class TextParser {
 
     public Boolean analyze(String text) {
         return (

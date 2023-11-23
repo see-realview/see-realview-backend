@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 @Component
 public class AnalyzeRequestConverter {
 
-    public List<AnalyzeRequest> converte(NaverSearchResponse response) {
+    public List<AnalyzeRequest> convert(NaverSearchResponse response) {
         return response.items()
                 .stream()
                 .map(naverSearchItem -> {
