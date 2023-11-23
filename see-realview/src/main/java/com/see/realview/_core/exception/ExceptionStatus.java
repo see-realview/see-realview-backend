@@ -10,6 +10,7 @@ public enum ExceptionStatus {
     // 공통 에러 1000번
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 1000, "인증되지 않았습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, 1001, "권한이 없습니다."),
+
     // 유저 에러 2000번
     EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, 2000, "이미 존재하는 이메일입니다."),
     PASSWORD_NOT_EQUALS(HttpStatus.BAD_REQUEST, 2001, "비밀번호가 일치하지 않습니다."),
@@ -28,7 +29,8 @@ public enum ExceptionStatus {
     NAVER_SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 3000, "네이버 검색 요청 중 에러가 발생했습니다."),
 
     // 포스트 분석 에러 4000번
-    POST_PARSE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, 4000, "포스트 파싱 중에 에러가 발생했습니다.")
+    POST_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4000, "포스트 파싱 중에 에러가 발생했습니다."),
+    IMAGE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4001, "이미지 파싱 중에 에러가 발생했습니다.")
     ;
 
     private final HttpStatus status;
