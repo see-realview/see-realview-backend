@@ -40,7 +40,7 @@ dependencies {
 
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 
-    implementation 'com.google.cloud:google-cloud-vision:3.10.0'
+    implementation 'com.google.cloud:google-cloud-vision:3.28.0'
 
     compileOnly 'org.projectlombok:lombok'
 
