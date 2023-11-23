@@ -5,12 +5,12 @@ import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.search.dto.request.KeywordSearchRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
 
-@Component
+@Service
 public class NaverSearcher {
 
     private final WebClient naverWebClient;
