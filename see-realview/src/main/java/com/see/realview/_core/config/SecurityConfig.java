@@ -59,7 +59,7 @@ public class SecurityConfig {
 
         http.httpBasic(HttpBasicConfigurer::disable);
 
-        http.apply(new CustomSecurityFilterManager(jwtProvider, tokenService));
+        http.apply(new CustomSecurityFilterManager(jwtProvider, tokenService, responseWriter));
 
         http.exceptionHandling((exceptionHandling) ->
                 exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
