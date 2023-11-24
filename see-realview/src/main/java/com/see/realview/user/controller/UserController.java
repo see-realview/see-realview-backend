@@ -1,7 +1,10 @@
 package com.see.realview.user.controller;
 
 import com.see.realview._core.response.Response;
-import com.see.realview.token.entity.TokenPair;
+import com.see.realview._core.response.ResponseData;
+import com.see.realview._core.security.JwtProvider;
+import com.see.realview.token.entity.Token;
+import com.see.realview.token.entity.constants.Header;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
 import com.see.realview.user.service.UserServiceImpl;
@@ -29,11 +32,11 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        TokenPair tokenPair = userService.login(request);
+        Token token = userService.login(request);
         return ResponseEntity
                 .ok()
-                .header("Authorization", tokenPair.access())
-                .header("Refresh", tokenPair.refresh())
-                .body(Response.success(null));
+                .header(Header.AUTHORIZATION.value(), JwtProvider.TOKEN_PREFIX + token.accessToken())
+                .header(Header.REFRESH.value(), JwtProvider.TOKEN_PREFIX + token.refreshToken())
+                .body(Response.of());
     }
 }

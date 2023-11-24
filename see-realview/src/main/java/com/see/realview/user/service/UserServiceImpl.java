@@ -1,8 +1,10 @@
 package com.see.realview.user.service;
 
-import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.ExceptionStatus;
-import com.see.realview.token.entity.TokenPair;
+import com.see.realview._core.exception.client.BadRequestException;
+import com.see.realview._core.security.JwtProvider;
+import com.see.realview.token.entity.Token;
+import com.see.realview.token.service.TokenServiceImpl;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
 import com.see.realview.user.entity.UserAccount;
@@ -18,16 +20,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserAccountRepositoryImpl userAccountRepository;
+
     private final UserAccountJPARepository userAccountJPARepository;
+
+    private final TokenServiceImpl tokenService;
+
+    private final JwtProvider jwtProvider;
 
     private final PasswordEncoder passwordEncoder;
 
 
     public UserServiceImpl(@Autowired UserAccountRepositoryImpl userAccountRepository,
                            @Autowired UserAccountJPARepository userAccountJPARepository,
+                           @Autowired TokenServiceImpl tokenService,
+                           @Autowired JwtProvider jwtProvider,
                            @Autowired PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;
         this.userAccountJPARepository = userAccountJPARepository;
+        this.tokenService = tokenService;
+        this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -47,12 +58,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TokenPair login(LoginRequest request) {
+    public Token login(LoginRequest request) {
         UserAccount userAccount = findUserAccountByEmail(request);
 
         checkPassword(request, userAccount);
 
-        return new TokenPair("TODO", "TODO");
+        String accessToken = jwtProvider.createAccessToken(userAccount);
+        String refreshToken = jwtProvider.createRefreshToken(userAccount);
+        Token token = new Token(accessToken, refreshToken);
+
+        tokenService.save(userAccount.getId(), token);
+        return new Token(accessToken, refreshToken);
     }
 
     private void checkEmailAlreadyExist(RegisterRequest request) {
