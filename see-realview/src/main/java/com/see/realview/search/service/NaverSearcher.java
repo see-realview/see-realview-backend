@@ -5,6 +5,7 @@ import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.search.dto.request.KeywordSearchRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,7 +19,7 @@ public class NaverSearcher {
     public static int SEARCH_COUNT = 10;
 
 
-    public NaverSearcher(@Autowired WebClient naverWebClient) {
+    public NaverSearcher(@Autowired @Qualifier("naverWebClient") WebClient naverWebClient) {
         this.naverWebClient = naverWebClient;
     }
 
