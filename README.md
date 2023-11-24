@@ -14,9 +14,10 @@
 - [ ] API 설계
 - [ ] 와이어프레임 구체화
 - [x] 네이버 검색 API 구현
-- [ ] 블로그 포스트 분석 메서드 구현
+- [x] 블로그 포스트 분석 메서드 구현
 - [ ] 음식점 검색 API 구현
 - [ ] 지도 위치 검색 API 구현
+- [ ] 포스트 분석 알고리즘 강화
 
 </br>
 
@@ -61,6 +62,7 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 
 ## 변경 로그 소개
 - 2023.10.19 : 백엔드 프로젝트 초기 설정 [#7](https://github.com/see-realview/see-realview-backend/issues/7)
+- 2023.11.24 : 블로그 포스트 분석 기능 구현 [#10](https://github.com/see-realview/see-realview-backend/issues/10)
 
 </br>
 
