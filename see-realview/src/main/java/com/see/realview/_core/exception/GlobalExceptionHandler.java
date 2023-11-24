@@ -5,6 +5,7 @@ import com.see.realview._core.exception.client.ForbiddenException;
 import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview._core.exception.client.UnauthorizedException;
 import com.see.realview._core.exception.server.ServerException;
+import com.see.realview._core.response.Response;
 import com.see.realview._core.response.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +44,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<?> serverError(ServerException exception) {
         return createExceptionResponseData(exception);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> exception(Exception exception) {
+        exception.printStackTrace();
+        CustomException customException = new ServerException(ExceptionStatus.INTERNAL_SERVER_ERROR);
+        return createExceptionResponseData(customException);
     }
 }
