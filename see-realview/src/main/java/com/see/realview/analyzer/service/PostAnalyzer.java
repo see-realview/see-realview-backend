@@ -45,7 +45,7 @@ public class PostAnalyzer {
                     Elements elements = htmlParser.parse(request);
 
                     String text = elements.text();
-                    Boolean advertisement = textParser.analyze(text);
+                    Boolean advertisement = textParser.analyzePostText(text);
                     if (advertisement) {
                         return new ImageParseRequest(request, false, null);
                     }

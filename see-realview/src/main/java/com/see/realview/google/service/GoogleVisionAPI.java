@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.see.realview.analyzer.dto.request.ImageParseRequest;
 import com.see.realview.analyzer.dto.response.PostDTO;
 import com.see.realview.analyzer.service.RequestConverter;
+import com.see.realview.analyzer.service.TextParser;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
@@ -28,6 +29,8 @@ public class GoogleVisionAPI {
 
     private final WebClient googleWebClient;
 
+    private final TextParser textParser;
+
     private final ObjectMapper objectMapper;
 
     @Value("${api.google.key}")
@@ -38,9 +41,11 @@ public class GoogleVisionAPI {
 
     public GoogleVisionAPI(@Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
                            @Autowired RequestConverter requestConverter,
+                           @Autowired TextParser textParser,
                            @Autowired ObjectMapper objectMapper) {
         this.googleWebClient = googleWebClient;
         this.requestConverter = requestConverter;
+        this.textParser = textParser;
         this.objectMapper = objectMapper;
     }
 
@@ -94,23 +99,14 @@ public class GoogleVisionAPI {
         });
     }
 
-    private static PostDTO parse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
+    private PostDTO parse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
         boolean advertisement = false;
 
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
-            advertisement = (imageText != null) &&
-                    (imageText.contains("지원받") || imageText.contains("제공받") || imageText.contains("협찬"));
+            advertisement = textParser.analyzeImageText(imageText);
         }
 
-        return new PostDTO(
-                parseRequest.request().link(),
-                parseRequest.request().title(),
-                parseRequest.request().description(),
-                parseRequest.request().date(),
-                parseRequest.request().bloggerName(),
-                advertisement,
-                0L
-        );
+        return PostDTO.of(parseRequest, advertisement, 0L);
     }
 }

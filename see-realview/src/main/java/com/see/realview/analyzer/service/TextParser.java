@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TextParser {
 
-    public Boolean analyze(String text) {
+    public Boolean analyzePostText(String text) {
         return (
                 (
                         (text.contains("업체") || text.contains("체험단") || text.contains("원고료"))
@@ -13,5 +13,10 @@ public class TextParser {
                         && text.contains("받아")
                 )
                 || text.contains("제공받") || text.contains("지원받"));
+    }
+
+    public Boolean analyzeImageText(String text) {
+        return (text != null) &&
+                (text.contains("지원받") || text.contains("제공받") || text.contains("협찬"));
     }
 }
