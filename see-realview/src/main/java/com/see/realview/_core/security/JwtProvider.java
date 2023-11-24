@@ -30,34 +30,31 @@ public class JwtProvider {
 
     private final static Long REFRESH_EXP = 1000L * 60 * 60 * 24 * 14;
 
-    private final Key accessKey;
+    @Value("${security.jwt.secret.access}")
+    private String ACCESS_SECRET;
 
-    private final Key refreshKey;
-
-    public JwtProvider(@Value("${security.jwt.secret.access}") String ACCESS_SECRET,
-                       @Value("${security.jwt.secret.refresh}") String REFRESH_SECRET) {
-        this.accessKey = Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes(StandardCharsets.UTF_8));
-        this.refreshKey = Keys.hmacShaKeyFor(REFRESH_SECRET.getBytes(StandardCharsets.UTF_8));
-    }
+    @Value("${security.jwt.secret.refresh}")
+    private String REFRESH_SECRET;
 
     public String createAccessToken(Long userId) {
-        return create(userId, ACCESS_EXP, accessKey);
+        return create(userId, ACCESS_EXP, ACCESS_SECRET);
     }
 
     public String createRefreshToken(Long userId) {
-        return create(userId, REFRESH_EXP, refreshKey);
+        return create(userId, REFRESH_EXP, REFRESH_SECRET);
     }
 
     public Long verifyAccessToken(String token) {
-        return verify(token, accessKey);
+        return verify(token, ACCESS_SECRET);
     }
 
     public Long verifyRefreshToken(String token) {
-        return verify(token, refreshKey);
+        return verify(token, REFRESH_SECRET);
     }
 
-    private Long verify(String token, Key key) {
+    private Long verify(String token, String secret) {
         token = token.replace(TOKEN_PREFIX, "");
+        Key key = getKey(secret);
 
         try {
             Claims claims = Jwts.parserBuilder()
@@ -79,18 +76,25 @@ public class JwtProvider {
         }
     }
 
-    private String create(Long userId, Long EXP, Key key) {
+    private static Key getKey(String secret) {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private String create(Long userId, Long EXP, String secret) {
         Map<String, Object> headers = createHeader();
         Map<String, Object> claims = createClaims(userId);
 
         Date expiredAt = new Date();
         expiredAt.setTime(expiredAt.getTime() + EXP);
 
+        Key key = getKey(secret);
+
         JwtBuilder jwtBuilder = Jwts.builder()
                 .setHeader(headers)
                 .setClaims(claims)
                 .setExpiration(expiredAt)
-                .signWith(key);
+                .signWith(key, signatureAlgorithm);
 
         return jwtBuilder.compact();
     }
