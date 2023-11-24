@@ -23,7 +23,7 @@ public class ExceptionResponseWriter {
         response.setStatus(exception.status().value());
         response.setContentType("application/json; charset=utf-8");
 
-        String body = objectMapper.writeValueAsString(exception);
+        String body = objectMapper.writeValueAsString(exception.body());
         response.getWriter().println(body);
     }
 }
