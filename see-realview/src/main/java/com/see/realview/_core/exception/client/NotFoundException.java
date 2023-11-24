@@ -12,6 +12,7 @@ public class NotFoundException extends RuntimeException implements CustomExcepti
 
 
     public NotFoundException(ExceptionStatus exception) {
+        super(exception.getMessage());
         this.exception = exception;
     }
 

@@ -12,6 +12,7 @@ public class ServerException extends RuntimeException implements CustomException
 
 
     public ServerException(ExceptionStatus exception) {
+        super(exception.getMessage());
         this.exception = exception;
     }
 
