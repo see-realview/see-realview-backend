@@ -20,6 +20,7 @@ env:
   GOOGLE_APPLICATION_CREDENTIALS : ${{ secrets.GCP_CREDENTIALS }}
   ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
   REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+  GCP_KEY: ${{ secrets.GCP_KEY }}
 
 jobs:
   build:
