@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostAnalyzer {
@@ -42,16 +43,31 @@ public class PostAnalyzer {
                 .stream()
                 .parallel()
                 .map(request -> {
-                    Elements elements = htmlParser.parse(request);
+                    Optional<Elements> elements = htmlParser.parse(request);
 
-                    String text = elements.text();
+                    if (elements.isEmpty()) {
+                        return new ImageParseRequest(request, false, null);
+                    }
+
+                    Elements components = elements.get();
+
+                    String text = components.text();
+                    System.out.println(request.link() + "\t " + text);
                     Boolean advertisement = textParser.analyzePostText(text);
                     if (advertisement) {
                         return new ImageParseRequest(request, false, null);
                     }
 
-                    Elements images = elements.select("img");
+                    Elements images = components.select("img");
                     Element image = images.get(images.size() - 1);
+
+                    String url = image.attr("src");
+                    if (url.contains("static.map") || // 지도 정보 제외
+                            url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
+                            url.contains("postfiles.pstatic.net") || // 블로그 이미지 제외
+                            url.contains(".gif")) { // GIF 파일 제외
+                        return new ImageParseRequest(request, false, null);
+                    }
 
                     return new ImageParseRequest(request, true, image.attr("src"));
                 })

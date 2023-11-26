@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 @Service
 public class GoogleVisionAPI {
@@ -62,6 +59,7 @@ public class GoogleVisionAPI {
             throw new RuntimeException(e);
         }
 
+        Collections.reverse(responses);
         Queue<String> resultQueue = new LinkedList<>(responses);
 
         return requests.stream()
@@ -93,7 +91,7 @@ public class GoogleVisionAPI {
             JsonNode textAnnotationsNode = node.path("textAnnotations");
             JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
             if (firstTextAnnotation != null) {
-                String description = firstTextAnnotation.path("description").asText();
+                String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
                 responses.add(description);
             }
         });
@@ -104,6 +102,7 @@ public class GoogleVisionAPI {
 
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
+            System.out.println(parseRequest.request().link() + "\t " + imageText + "\t " + parseRequest.url());
             advertisement = textParser.analyzeImageText(imageText);
         }
 

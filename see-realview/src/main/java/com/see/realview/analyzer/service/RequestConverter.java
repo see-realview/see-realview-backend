@@ -12,10 +12,12 @@ import com.see.realview.search.dto.response.NaverSearchResponse;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -48,12 +50,13 @@ public class RequestConverter {
                             naverSearchItem.bloggername()
                     );
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
     public List<RequestIterator> getRequestIterators(List<ImageParseRequest> requests, List<RequestFeature> requestFeatures) {
         return IntStream
-                .range(0, requests.size() - 1)
+                .range(0, requests.size())
                 .parallel()
                 .mapToObj(idx -> {
                     ImageParseRequest request = requests.get(idx);
@@ -71,10 +74,14 @@ public class RequestConverter {
             }
 
             URL imageURL = new URL(url);
-            byte[] imageBytes = imageURL.openConnection().getInputStream().readAllBytes();
+            HttpURLConnection connection = (HttpURLConnection) imageURL.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            byte[] imageBytes = connection.getInputStream().readAllBytes();
             return Base64.getEncoder().encodeToString(imageBytes);
         }
         catch (IOException exception) {
+            exception.printStackTrace();
             throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
         }
     }
@@ -82,7 +89,7 @@ public class RequestConverter {
     public List<RequestItem> getRequestItems(List<RequestIterator> requestPairs) {
         return requestPairs
                 .stream()
-                .sorted(Comparator.comparing(RequestIterator::index))
+                .sorted(Comparator.comparing(RequestIterator::index).reversed())
                 .map(RequestIterator::item)
                 .filter(item -> item.image().content() != null)
                 .toList();
