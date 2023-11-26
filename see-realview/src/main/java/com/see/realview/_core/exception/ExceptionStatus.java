@@ -33,7 +33,11 @@ public enum ExceptionStatus {
 
     // 포스트 분석 에러 4000번
     POST_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4000, "포스트 파싱 중에 에러가 발생했습니다."),
-    IMAGE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4001, "이미지 파싱 중에 에러가 발생했습니다.")
+    IMAGE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4001, "이미지 파싱 중에 에러가 발생했습니다."),
+
+    // 이미지 캐싱 에러 5000번
+    IMAGE_CACHING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5000, "이미지 캐싱 중에 에러가 발생했습니다."),
+    CACHED_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "캐싱된 이미지가 존재하지 않습니다.")
     ;
 
     private final HttpStatus status;
