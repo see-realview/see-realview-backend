@@ -8,7 +8,6 @@ import com.see.realview.token.service.TokenServiceImpl;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
 import com.see.realview.user.entity.UserAccount;
-import com.see.realview.user.repository.UserAccountJPARepository;
 import com.see.realview.user.repository.UserAccountRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +20,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserAccountRepositoryImpl userAccountRepository;
 
-    private final UserAccountJPARepository userAccountJPARepository;
-
     private final TokenServiceImpl tokenService;
 
     private final JwtProvider jwtProvider;
@@ -31,12 +28,10 @@ public class UserServiceImpl implements UserService {
 
 
     public UserServiceImpl(@Autowired UserAccountRepositoryImpl userAccountRepository,
-                           @Autowired UserAccountJPARepository userAccountJPARepository,
                            @Autowired TokenServiceImpl tokenService,
                            @Autowired JwtProvider jwtProvider,
                            @Autowired PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;
-        this.userAccountJPARepository = userAccountJPARepository;
         this.tokenService = tokenService;
         this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
@@ -54,7 +49,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(request.password()))
                 .build();
 
-        userAccountJPARepository.save(userAccount);
+        userAccountRepository.save(userAccount);
     }
 
     @Override
