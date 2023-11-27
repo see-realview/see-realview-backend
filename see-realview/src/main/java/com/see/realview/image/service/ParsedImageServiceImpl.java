@@ -5,8 +5,8 @@ import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.repository.ParsedImageJPARepository;
 import com.see.realview.image.repository.ParsedImageRedisRepositoryImpl;
+import com.see.realview.image.repository.ParsedImageRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +17,14 @@ import java.util.Optional;
 @Service
 public class ParsedImageServiceImpl implements ParsedImageService {
 
-    private final ParsedImageJPARepository parsedImageJPARepository;
+    private final ParsedImageRepositoryImpl parsedImageRepository;
 
     private final ParsedImageRedisRepositoryImpl parsedImageRedisRepository;
 
 
-    public ParsedImageServiceImpl(@Autowired ParsedImageJPARepository parsedImageJPARepository,
+    public ParsedImageServiceImpl(@Autowired ParsedImageRepositoryImpl parsedImageRepository,
                                   @Autowired ParsedImageRedisRepositoryImpl parsedImageRedisRepository) {
-        this.parsedImageJPARepository = parsedImageJPARepository;
+        this.parsedImageRepository = parsedImageRepository;
         this.parsedImageRedisRepository = parsedImageRedisRepository;
     }
 
@@ -67,7 +67,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     public void rebase() {
         List<CachedImage> cachedImages = parsedImageRedisRepository.findAll();
         List<String> urls = cachedImages.stream().map(CachedImage::url).toList();
-        List<ParsedImage> parsedImages = parsedImageJPARepository.findAllByUrlIn(urls);
+        List<ParsedImage> parsedImages = parsedImageRepository.findAllByUrlIn(urls);
 
         cachedImages
                 .forEach(image -> {
@@ -75,11 +75,11 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                     saved.updateCount(image.data().count());
                 });
 
-        parsedImageJPARepository.saveAll(parsedImages);
+        parsedImageRepository.saveAll(parsedImages);
         parsedImageRedisRepository.deleteAll();
 
-        parsedImageJPARepository
-                .findTop30ByOrderByCountDesc()
+        parsedImageRepository
+                .findCachingImages()
                 .forEach(image -> {
                     ImageData imageData = new ImageData(image.getAdvertisement(), image.getCount());
                     CachedImage cachedImage = new CachedImage(image.getUrl(), imageData);

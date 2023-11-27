@@ -1,6 +1,7 @@
 package com.see.realview.image.repository;
 
 import com.see.realview.image.dto.CachedImage;
+import com.see.realview.image.entity.ParsedImage;
 
 import java.util.List;
 import java.util.Optional;
