@@ -29,6 +29,20 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     }
 
     @Override
+    public Optional<CachedImage> isAlreadyParsedImage(String url) {
+        Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(url);
+
+        if (cachedImage.isEmpty()) {
+            return Optional.empty();
+        }
+
+        CachedImage newImage = cachedImage.get().increment();
+        parsedImageRedisRepository.save(newImage);
+
+        return Optional.of(newImage);
+    }
+
+    @Override
     public Optional<ParsedImage> findByURL(String url) {
         Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(url);
 
@@ -63,6 +77,11 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     }
 
     @Override
+    public void saveAll(List<ParsedImage> images) {
+        parsedImageRepository.saveAll(images);
+    }
+
+    @Override
     @Transactional
     public void rebase() {
         List<CachedImage> cachedImages = parsedImageRedisRepository.findAll();
@@ -71,7 +90,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
 
         cachedImages
                 .forEach(image -> {
-                    ParsedImage saved = findParsedImageInJPA(parsedImages, image);
+                    ParsedImage saved = findParsedImage(parsedImages, image);
                     saved.updateCount(image.data().count());
                 });
 
@@ -88,7 +107,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                 });
     }
 
-    private static ParsedImage findParsedImageInJPA(List<ParsedImage> parsedImages, CachedImage image) {
+    private static ParsedImage findParsedImage(List<ParsedImage> parsedImages, CachedImage image) {
         return parsedImages
                 .stream()
                 .filter(img -> img.getUrl().equals(image.url()))

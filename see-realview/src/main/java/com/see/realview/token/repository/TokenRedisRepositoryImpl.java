@@ -33,30 +33,21 @@ public class TokenRedisRepositoryImpl implements TokenRedisRepository {
     @Override
     public Optional<Token> findTokenById(Long id) {
         String key = getKeyById(id);
-        String token = valueOperations.get(key);
+        String value = valueOperations.get(key);
 
-        if (token == null) {
+        if (value == null) {
             return Optional.empty();
         }
 
-        try {
-            return Optional.ofNullable(objectMapper.readValue(token, Token.class));
-        }
-        catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.TOKEN_PARSING_ERROR);
-        }
+        Token token = getToken(value);
+        return Optional.ofNullable(token);
     }
 
     @Override
     public void save(Long id, Token token) {
-        try {
-            String key = getKeyById(id);
-            String value = objectMapper.writeValueAsString(token);
-            valueOperations.set(key, value);
-        }
-        catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.TOKEN_PARSING_ERROR);
-        }
+        String key = getKeyById(id);
+        String value = getValue(token);
+        valueOperations.set(key, value);
     }
 
     @Override
@@ -73,5 +64,23 @@ public class TokenRedisRepositoryImpl implements TokenRedisRepository {
 
     private static String getKeyById(Long id) {
         return TOKEN_PREFIX + id;
+    }
+
+    private String getValue(Token token) {
+        try {
+            return objectMapper.writeValueAsString(token);
+        }
+        catch (JsonProcessingException exception) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
+    }
+
+    private Token getToken(String value) {
+        try {
+            return objectMapper.readValue(value, Token.class);
+        }
+        catch (JsonProcessingException exception) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
     }
 }

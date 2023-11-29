@@ -6,8 +6,6 @@ import com.see.realview.analyzer.dto.response.AnalyzeResponse;
 import com.see.realview.analyzer.dto.response.PostDTO;
 import com.see.realview.google.service.GoogleVisionAPI;
 import com.see.realview.image.dto.CachedImage;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.image.service.ParsedImageServiceImpl;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import org.jsoup.nodes.Element;
@@ -70,12 +68,11 @@ public class PostAnalyzer {
                     Element image = images.get(images.size() - 1);
 
                     String url = image.attr("src");
-                    Optional<ParsedImage> parsedImageOptional = parsedImageService.findByURL(url);
+                    String rawURL = url.replaceAll("\\\\?.*$", "");
 
-                    if (parsedImageOptional.isPresent()) {
-                        ParsedImage parsedImage = parsedImageOptional.get();
-                        parsedImageService.increment(url);
-                        new ImageParseRequest(request, false, null, parsedImage.getAdvertisement());
+                    Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
+                    if (cachedImage.isPresent()) {
+                        return new ImageParseRequest(request, false, null, cachedImage.get().data().advertisement());
                     }
 
                     if (url.contains("static.map") || // 지도 정보 제외
@@ -85,7 +82,7 @@ public class PostAnalyzer {
                         return new ImageParseRequest(request, false, null, false);
                     }
 
-                    return new ImageParseRequest(request, true, image.attr("src"), false);
+                    return new ImageParseRequest(request, true, url, false);
                 })
                 .toList();
 

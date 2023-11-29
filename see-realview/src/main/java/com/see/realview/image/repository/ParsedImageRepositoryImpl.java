@@ -25,7 +25,7 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
 
     private final String PARSED_IMAGE_TABLE = "parsed_image_tb";
 
-    private final static int IMAGE_CACHING_SIZE = 30;
+    private final static int IMAGE_CACHING_SIZE = 100;
 
 
     public ParsedImageRepositoryImpl(@Autowired EntityManager entityManager,

@@ -37,12 +37,6 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     }
 
     @Override
-    public boolean isAlreadyParsed(String url) {
-        String key = getKeyByURL(url);
-        return valueOperations.get(key) != null;
-    }
-
-    @Override
     public Optional<CachedImage> findByURL(String url) {
         String key = getKeyByURL(url);
         String data = valueOperations.get(key);
@@ -106,7 +100,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
             return objectMapper.writeValueAsString(image.data());
         }
         catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.IMAGE_CACHING_ERROR);
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
         }
     }
 
@@ -115,7 +109,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
             return objectMapper.readValue(data, ImageData.class);
         }
         catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.IMAGE_CACHING_ERROR);
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
         }
     }
 }

@@ -8,8 +8,6 @@ import java.util.Optional;
 
 public interface ParsedImageRedisRepository {
 
-    boolean isAlreadyParsed(String url);
-
     Optional<CachedImage> findByURL(String key);
 
     List<CachedImage> findAll();
