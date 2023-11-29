@@ -3,6 +3,8 @@ package com.see.realview.google.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.analyzer.dto.request.ImageParseRequest;
 import com.see.realview.analyzer.dto.response.PostDTO;
 import com.see.realview.analyzer.service.RequestConverter;
@@ -11,19 +13,20 @@ import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
 import com.see.realview.google.dto.VisionRequest;
+import com.see.realview.image.entity.ParsedImage;
+import com.see.realview.image.service.ParsedImageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 @Service
 public class GoogleVisionAPI {
+
+    private final ParsedImageServiceImpl parsedImageService;
 
     private final RequestConverter requestConverter;
 
@@ -39,10 +42,12 @@ public class GoogleVisionAPI {
     private final static List<RequestFeature> requestFeatures = List.of(new RequestFeature("TEXT_DETECTION"));
 
 
-    public GoogleVisionAPI(@Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
+    public GoogleVisionAPI(@Autowired ParsedImageServiceImpl parsedImageService,
+                           @Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
                            @Autowired RequestConverter requestConverter,
                            @Autowired TextParser textParser,
                            @Autowired ObjectMapper objectMapper) {
+        this.parsedImageService = parsedImageService;
         this.googleWebClient = googleWebClient;
         this.requestConverter = requestConverter;
         this.textParser = textParser;
@@ -53,20 +58,41 @@ public class GoogleVisionAPI {
         List<RequestIterator> requestIterators = requestConverter.getRequestIterators(requests, requestFeatures);
         List<RequestItem> items = requestConverter.getRequestItems(requestIterators);
 
-        List<String> responses = new ArrayList<>();
+        List<String> responses;
 
         try {
             StringBuilder result = getVisionAPIResponse(items);
-            parseVisionAPIResponse(responses, result);
+            responses = parseVisionAPIResponse(result);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
         }
 
+        Collections.reverse(responses);
         Queue<String> resultQueue = new LinkedList<>(responses);
 
-        return requests.stream()
-                .map(parseRequest -> parse(resultQueue, parseRequest))
+        List<ParsedImage> images = new ArrayList<>();
+
+        List<PostDTO> posts =  requests.stream()
+                .map(parseRequest -> {
+                    boolean advertisement = getImageParseResponse(resultQueue, parseRequest);
+
+                    if (advertisement) {
+                        images.add(
+                                ParsedImage.builder()
+                                        .url(parseRequest.url())
+                                        .advertisement(true)
+                                        .count(1L)
+                                        .build()
+                        );
+                    }
+
+                    return PostDTO.of(parseRequest, advertisement, 0L);
+                })
                 .toList();
+
+        parsedImageService.saveAll(images);
+
+        return posts;
     }
 
     private StringBuilder getVisionAPIResponse(List<RequestItem> items) throws JsonProcessingException {
@@ -85,7 +111,8 @@ public class GoogleVisionAPI {
         return result;
     }
 
-    private void parseVisionAPIResponse(List<String> responses, StringBuilder result) throws JsonProcessingException {
+    private List<String> parseVisionAPIResponse(StringBuilder result) throws JsonProcessingException {
+        List<String> responses = new ArrayList<>();
         JsonNode rootNode = objectMapper.readTree(result.toString());
         JsonNode responsesNode = rootNode.path("responses");
 
@@ -93,20 +120,22 @@ public class GoogleVisionAPI {
             JsonNode textAnnotationsNode = node.path("textAnnotations");
             JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
             if (firstTextAnnotation != null) {
-                String description = firstTextAnnotation.path("description").asText();
+                String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
                 responses.add(description);
             }
         });
+
+        return responses;
     }
 
-    private PostDTO parse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
-        boolean advertisement = false;
-
+    private boolean getImageParseResponse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
-            advertisement = textParser.analyzeImageText(imageText);
+            System.out.println(parseRequest.request().link() + "\t " + imageText + "\t " + parseRequest.url());
+
+            return textParser.analyzeImageText(imageText);
         }
 
-        return PostDTO.of(parseRequest, advertisement, 0L);
+        return false;
     }
 }

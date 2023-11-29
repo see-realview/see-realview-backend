@@ -12,6 +12,7 @@ public class BadRequestException extends RuntimeException implements CustomExcep
 
 
     public BadRequestException(ExceptionStatus exception) {
+        super(exception.getMessage());
         this.exception = exception;
     }
 

@@ -21,6 +21,8 @@ env:
   ACCESS_SECRET: ${{ secrets.ACCESS_SECRET }}
   REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
   GCP_KEY: ${{ secrets.GCP_KEY }}
+  GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
+  GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
 
 jobs:
   build:

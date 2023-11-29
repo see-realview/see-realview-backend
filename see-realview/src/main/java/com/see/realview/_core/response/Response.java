@@ -9,4 +9,8 @@ public class Response {
         ErrorData errorData = new ErrorData(status, message);
         return new ResponseData<>(false, null, errorData);
     }
+
+    public static <T> ResponseData<T> of() {
+        return success(null);
+    }
 }

@@ -1,9 +1,11 @@
 package com.see.realview._core.security;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.client.UnauthorizedException;
 import com.see.realview.token.entity.Token;
+import com.see.realview.token.entity.constants.Header;
 import com.see.realview.token.service.TokenServiceImpl;
 import com.see.realview.user.entity.UserAccount;
 import jakarta.servlet.FilterChain;
@@ -38,40 +40,54 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String accessHeader = request.getHeader(JwtProvider.AUTHORIZATION_HEADER);
-        String refreshHeader = request.getHeader(JwtProvider.REFRESH_HEADER);
+        String accessToken = resolveHeader(request, Header.AUTHORIZATION.value());
+        String refreshToken = resolveHeader(request, Header.REFRESH.value());
 
-        if (accessHeader == null) {
+        if (accessToken == null) {
             chain.doFilter(request, response);
             return;
         }
 
-        Long userAccountId = jwtProvider.verifyAccessToken(accessHeader);
+        DecodedJWT decodedJWT = jwtProvider.verifyAccessToken(accessToken);
+        Long userAccountId = decodedJWT.getClaim("id").asLong();
 
         if (request.getRequestURI().contains("/token/refresh")) {
-            if (refreshHeader == null) {
+            if (refreshToken == null) {
                 throw new UnauthorizedException(ExceptionStatus.REFRESH_TOKEN_REQUIRED);
             }
 
-            Token token = tokenService.findTokenById(userAccountId);
-            if (!token.equals(accessHeader, refreshHeader)) {
-                log.debug("토큰 쌍이 일치하지 않아 폐기합니다. id = " + userAccountId);
-                throw new BadRequestException(ExceptionStatus.TOKEN_PAIR_NOT_MATCH);
+            if (jwtProvider.isValidAccessToken(accessToken)) {
+                throw new UnauthorizedException(ExceptionStatus.ACCESS_TOKEN_NOT_EXPIRED);
             }
 
+            Token token = tokenService.findTokenById(userAccountId);
             tokenService.deleteById(userAccountId);
-            createAuthentication(userAccountId);
-            log.debug("리프래시 토큰을 이용한 토큰 생성. id = " + userAccountId);
-            chain.doFilter(request, response);
+
+            if (!token.equals(accessToken, refreshToken)) {
+                throw new UnauthorizedException(ExceptionStatus.TOKEN_PAIR_NOT_MATCH);
+            }
         }
         else {
-            createAuthentication(userAccountId);
-            chain.doFilter(request, response);
+            if (refreshToken != null) {
+                throw new UnauthorizedException(ExceptionStatus.UNNECESSARY_REFRESH_TOKEN);
+            }
         }
 
+        setAuthentication(userAccountId);
+        chain.doFilter(request, response);
     }
 
-    private void createAuthentication(Long userAccountId) {
+    private static String resolveHeader(HttpServletRequest request, String header) {
+        String content = request.getHeader(header);
+
+        if (content == null) {
+            return null;
+        }
+
+        return content.substring(7);
+    }
+
+    private void setAuthentication(Long userAccountId) {
         UserAccount userAccount = UserAccount.builder().id(userAccountId).build();
         CustomUserDetails userDetails = new CustomUserDetails(userAccount);
         Authentication authentication = new UsernamePasswordAuthenticationToken(

@@ -59,7 +59,7 @@ public class SecurityConfig {
 
         http.httpBasic(HttpBasicConfigurer::disable);
 
-        http.apply(new CustomSecurityFilterManager(jwtProvider, tokenService));
+        http.apply(new CustomSecurityFilterManager(jwtProvider, tokenService, responseWriter));
 
         http.exceptionHandling((exceptionHandling) ->
                 exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
@@ -78,7 +78,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/user/register"),
                                 new AntPathRequestMatcher("/user/login"),
-                                new AntPathRequestMatcher("/search/**")
+                                new AntPathRequestMatcher("/search/**"),
+                                new AntPathRequestMatcher("/email/**")
                         ).permitAll()
                         .anyRequest().authenticated()
         );
