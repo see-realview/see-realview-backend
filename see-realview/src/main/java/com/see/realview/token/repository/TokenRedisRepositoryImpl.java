@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Repository
@@ -22,6 +23,8 @@ public class TokenRedisRepositoryImpl implements TokenRedisRepository {
     private final ObjectMapper objectMapper;
 
     private final static String TOKEN_PREFIX = "token_";
+
+    private final static Duration TOKEN_EXP = Duration.ofDays(3);
 
     public TokenRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate,
                                     @Autowired ObjectMapper objectMapper) {
@@ -47,7 +50,7 @@ public class TokenRedisRepositoryImpl implements TokenRedisRepository {
     public void save(Long id, Token token) {
         String key = getKeyById(id);
         String value = getValue(token);
-        valueOperations.set(key, value);
+        valueOperations.set(key, value, TOKEN_EXP);
     }
 
     @Override

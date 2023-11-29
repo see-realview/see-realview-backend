@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Repository
@@ -16,6 +17,8 @@ public class EmailCodeRedisRepositoryImpl implements EmailCodeRedisRepository {
 
     private final static String EMAIL_PREFIX = "email_";
 
+    private final static Duration CODE_EXP = Duration.ofMinutes(10);
+
 
     public EmailCodeRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -25,7 +28,7 @@ public class EmailCodeRedisRepositoryImpl implements EmailCodeRedisRepository {
     @Override
     public void save(String email, String code) {
         String key = getKey(email);
-        valueOperations.set(key, code);
+        valueOperations.set(key, code, CODE_EXP);
     }
 
     @Override
