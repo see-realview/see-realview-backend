@@ -78,7 +78,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 new AntPathRequestMatcher("/user/register"),
                                 new AntPathRequestMatcher("/user/login"),
-                                new AntPathRequestMatcher("/search/**")
+                                new AntPathRequestMatcher("/search/**"),
+                                new AntPathRequestMatcher("/email/**")
                         ).permitAll()
                         .anyRequest().authenticated()
         );
