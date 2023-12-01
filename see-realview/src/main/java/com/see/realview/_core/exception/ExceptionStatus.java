@@ -34,6 +34,8 @@ public enum ExceptionStatus {
     EMAIL_AUTHENTICATION_CODE_GENERATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 2201, "이메일 인증 코드 생성 중 오류가 발생했습니다."),
     EMAIL_AUTHENTICATION_CODE_NOT_FOUND(HttpStatus.NOT_FOUND, 2202, "이메일 인증 코드를 찾을 수 없습니다."),
     EMAIL_AUTHENTICATION_CODE_NOT_MATCHED(HttpStatus.BAD_REQUEST, 2203, "이메일 인증 코드가 일치하지 않습니다."),
+    EMAIL_ALREADT_REGISTERED(HttpStatus.BAD_REQUEST, 2204, "이미 회원가입된 이메일입니다."),
+    EMAIL_NOT_AUTHENTICATED(HttpStatus.BAD_REQUEST, 2205, "인증되지 않은 이메일입니다."),
 
     // 네이버 검색 에러 3000번
     NAVER_SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 3000, "네이버 검색 요청 중 에러가 발생했습니다."),

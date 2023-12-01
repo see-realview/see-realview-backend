@@ -5,13 +5,14 @@ import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.code.dto.VerifyEmailRequest;
+import com.see.realview.code.entity.EmailCode;
 import com.see.realview.code.repository.EmailCodeRedisRepositoryImpl;
+import com.see.realview.user.service.UserServiceImpl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,8 @@ import java.util.stream.IntStream;
 public class EmailAuthenticationServiceImpl implements EmailAuthenticationService {
 
     private final EmailCodeRedisRepositoryImpl emailCodeRedisRepository;
+
+    private final UserServiceImpl userService;
 
     private final JavaMailSenderImpl javaMailSender;
 
@@ -60,14 +63,21 @@ public class EmailAuthenticationServiceImpl implements EmailAuthenticationServic
 
 
     public EmailAuthenticationServiceImpl(@Autowired EmailCodeRedisRepositoryImpl emailCodeRedisRepository,
+                                          @Autowired UserServiceImpl userService,
                                           @Autowired JavaMailSenderImpl javaMailSender) {
         this.emailCodeRedisRepository = emailCodeRedisRepository;
+        this.userService = userService;
         this.javaMailSender = javaMailSender;
     }
 
     @Override
     @Transactional
     public void send(String email) {
+        userService.findByEmail(email)
+                .ifPresent((user) -> {
+                    throw new BadRequestException(ExceptionStatus.EMAIL_ALREADT_REGISTERED);
+                });
+
         String code = createAuthenticationCode();
         MimeMessage message = createMessage(email, code);
         emailCodeRedisRepository.save(email, code);
@@ -76,12 +86,14 @@ public class EmailAuthenticationServiceImpl implements EmailAuthenticationServic
 
     @Override
     public void check(VerifyEmailRequest request) {
-        String code = emailCodeRedisRepository.findCodeByEmail(request.email())
+        EmailCode emailCode = emailCodeRedisRepository.findCodeByEmail(request.email())
                 .orElseThrow(() -> new NotFoundException(ExceptionStatus.EMAIL_AUTHENTICATION_CODE_NOT_FOUND));
 
-        if (!request.code().equals(code)) {
+        if (!request.code().equals(emailCode.code())) {
             throw new BadRequestException(ExceptionStatus.EMAIL_AUTHENTICATION_CODE_NOT_MATCHED);
         }
+
+        emailCodeRedisRepository.authenticated(request.email());
     }
 
     private String createAuthenticationCode() {
