@@ -6,7 +6,8 @@ import com.see.realview.analyzer.dto.response.AnalyzeResponse;
 import com.see.realview.analyzer.dto.response.PostDTO;
 import com.see.realview.google.service.GoogleVisionAPI;
 import com.see.realview.image.dto.CachedImage;
-import com.see.realview.image.service.ParsedImageServiceImpl;
+import com.see.realview.image.dto.ImageData;
+import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -27,14 +28,14 @@ public class PostAnalyzer {
 
     private final GoogleVisionAPI googleVisionAPI;
 
-    private final ParsedImageServiceImpl parsedImageService;
+    private final ParsedImageService parsedImageService;
 
 
     public PostAnalyzer(@Autowired RequestConverter requestConverter,
                         @Autowired HtmlParser htmlParser,
                         @Autowired TextParser textParser,
                         @Autowired GoogleVisionAPI googleVisionAPI,
-                        @Autowired ParsedImageServiceImpl parsedImageService) {
+                        @Autowired ParsedImageService parsedImageService) {
         this.requestConverter = requestConverter;
         this.htmlParser = htmlParser;
         this.textParser = textParser;
@@ -68,11 +69,12 @@ public class PostAnalyzer {
                     Element image = images.get(images.size() - 1);
 
                     String url = image.attr("src");
-                    String rawURL = url.replaceAll("\\\\?.*$", "");
+                    String rawURL = url.replaceAll("\\?.*$", "");
 
                     Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
                     if (cachedImage.isPresent()) {
-                        return new ImageParseRequest(request, false, null, cachedImage.get().data().advertisement());
+                        ImageData cachedData = cachedImage.get().data();
+                        return new ImageParseRequest(request, false, rawURL, cachedData.advertisement());
                     }
 
                     if (url.contains("static.map") || // 지도 정보 제외

@@ -14,6 +14,7 @@ import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
 import com.see.realview.google.dto.VisionRequest;
 import com.see.realview.image.entity.ParsedImage;
+import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.image.service.ParsedImageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +27,7 @@ import java.util.*;
 @Service
 public class GoogleVisionAPI {
 
-    private final ParsedImageServiceImpl parsedImageService;
+    private final ParsedImageService parsedImageService;
 
     private final RequestConverter requestConverter;
 
@@ -42,7 +43,7 @@ public class GoogleVisionAPI {
     private final static List<RequestFeature> requestFeatures = List.of(new RequestFeature("TEXT_DETECTION"));
 
 
-    public GoogleVisionAPI(@Autowired ParsedImageServiceImpl parsedImageService,
+    public GoogleVisionAPI(@Autowired ParsedImageService parsedImageService,
                            @Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
                            @Autowired RequestConverter requestConverter,
                            @Autowired TextParser textParser,
@@ -75,15 +76,17 @@ public class GoogleVisionAPI {
         List<PostDTO> posts =  requests.stream()
                 .map(parseRequest -> {
                     boolean advertisement = getImageParseResponse(resultQueue, parseRequest);
+                    String url = parseRequest.url();
 
-                    if (advertisement) {
-                        images.add(
-                                ParsedImage.builder()
-                                        .url(parseRequest.url())
-                                        .advertisement(true)
-                                        .count(1L)
-                                        .build()
-                        );
+                    if (parseRequest.required()) {
+                        String rawURL = url.replaceAll("\\?.*$", "");
+                        images.add(ParsedImage.of(rawURL, advertisement));
+                    }
+                    else {
+                        advertisement = parseRequest.advertisement();
+                        if (url != null) {
+                            images.add(ParsedImage.of(url, advertisement));
+                        }
                     }
 
                     return PostDTO.of(parseRequest, advertisement, 0L);

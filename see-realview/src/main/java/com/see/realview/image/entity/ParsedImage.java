@@ -37,6 +37,14 @@ public class ParsedImage {
         this.count = count;
     }
 
+    public static ParsedImage of(String url, Boolean advertisement) {
+        return ParsedImage.builder()
+                .url(url)
+                .advertisement(advertisement)
+                .count(1L) // batch update 시에 중복 레코드는 count + 1로 업데이트하기 때문에 디폴트는 항상 1로 고정
+                .build();
+    }
+
     public void updateCount(Long count) {
         this.count = count;
     }
