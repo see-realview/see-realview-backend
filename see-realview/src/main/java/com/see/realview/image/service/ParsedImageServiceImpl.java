@@ -100,7 +100,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
         parsedImageRepository
                 .findCachingImages()
                 .forEach(image -> {
-                    ImageData imageData = new ImageData(image.getAdvertisement(), image.getCount());
+                    ImageData imageData = new ImageData(image.getAdvertisement(), 0L);
                     CachedImage cachedImage = new CachedImage(image.getUrl(), imageData);
 
                     parsedImageRedisRepository.save(cachedImage);

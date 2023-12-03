@@ -63,7 +63,7 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
         String sql = String.format("""
                 INSERT INTO `%s` (url, advertisement, count)
                 VALUES (:url, :advertisement, :count)
-                ON DUPLICATE KEY UPDATE url = :url, advertisement = :advertisement, count = count + 1
+                ON DUPLICATE KEY UPDATE url = :url, advertisement = :advertisement, count = count + :count
                 """, PARSED_IMAGE_TABLE);
 
         SqlParameterSource[] parameterSources = images
