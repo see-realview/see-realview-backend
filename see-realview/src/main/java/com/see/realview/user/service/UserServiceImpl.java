@@ -5,13 +5,13 @@ import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview._core.security.JwtProvider;
 import com.see.realview.code.entity.EmailCode;
-import com.see.realview.code.repository.EmailCodeRedisRepositoryImpl;
+import com.see.realview.code.repository.EmailCodeRedisRepository;
 import com.see.realview.token.entity.Token;
-import com.see.realview.token.service.TokenServiceImpl;
+import com.see.realview.token.service.TokenService;
 import com.see.realview.user.dto.request.LoginRequest;
 import com.see.realview.user.dto.request.RegisterRequest;
 import com.see.realview.user.entity.UserAccount;
-import com.see.realview.user.repository.UserAccountRepositoryImpl;
+import com.see.realview.user.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,20 +23,20 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    private final UserAccountRepositoryImpl userAccountRepository;
+    private final UserAccountRepository userAccountRepository;
 
-    private final TokenServiceImpl tokenService;
+    private final TokenService tokenService;
 
-    private final EmailCodeRedisRepositoryImpl emailCodeRedisRepository;
+    private final EmailCodeRedisRepository emailCodeRedisRepository;
 
     private final JwtProvider jwtProvider;
 
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserServiceImpl(@Autowired UserAccountRepositoryImpl userAccountRepository,
-                           @Autowired TokenServiceImpl tokenService,
-                           @Autowired EmailCodeRedisRepositoryImpl emailCodeRedisRepository,
+    public UserServiceImpl(@Autowired UserAccountRepository userAccountRepository,
+                           @Autowired TokenService tokenService,
+                           @Autowired EmailCodeRedisRepository emailCodeRedisRepository,
                            @Autowired JwtProvider jwtProvider,
                            @Autowired PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;

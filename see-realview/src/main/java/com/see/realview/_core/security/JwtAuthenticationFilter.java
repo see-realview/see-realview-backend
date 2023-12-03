@@ -1,12 +1,11 @@
 package com.see.realview._core.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.client.UnauthorizedException;
 import com.see.realview.token.entity.Token;
 import com.see.realview.token.entity.constants.Header;
-import com.see.realview.token.service.TokenServiceImpl;
+import com.see.realview.token.service.TokenService;
 import com.see.realview.user.entity.UserAccount;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,12 +25,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final JwtProvider jwtProvider;
 
-    private final TokenServiceImpl tokenService;
+    private final TokenService tokenService;
 
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager,
                                    JwtProvider jwtProvider,
-                                   TokenServiceImpl tokenService) {
+                                   TokenService tokenService) {
         super(authenticationManager);
         this.jwtProvider = jwtProvider;
         this.tokenService = tokenService;

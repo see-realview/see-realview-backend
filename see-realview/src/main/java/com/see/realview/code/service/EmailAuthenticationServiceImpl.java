@@ -6,14 +6,14 @@ import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.code.dto.VerifyEmailRequest;
 import com.see.realview.code.entity.EmailCode;
-import com.see.realview.code.repository.EmailCodeRedisRepositoryImpl;
-import com.see.realview.user.service.UserServiceImpl;
+import com.see.realview.code.repository.EmailCodeRedisRepository;
+import com.see.realview.user.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +26,11 @@ import java.util.stream.IntStream;
 @Service
 public class EmailAuthenticationServiceImpl implements EmailAuthenticationService {
 
-    private final EmailCodeRedisRepositoryImpl emailCodeRedisRepository;
+    private final EmailCodeRedisRepository emailCodeRedisRepository;
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
-    private final JavaMailSenderImpl javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     private final static int AUTHENTICATION_CODE_LENGTH = 6;
 
@@ -62,9 +62,9 @@ public class EmailAuthenticationServiceImpl implements EmailAuthenticationServic
     private String SENDER;
 
 
-    public EmailAuthenticationServiceImpl(@Autowired EmailCodeRedisRepositoryImpl emailCodeRedisRepository,
-                                          @Autowired UserServiceImpl userService,
-                                          @Autowired JavaMailSenderImpl javaMailSender) {
+    public EmailAuthenticationServiceImpl(@Autowired EmailCodeRedisRepository emailCodeRedisRepository,
+                                          @Autowired UserService userService,
+                                          @Autowired JavaMailSender javaMailSender) {
         this.emailCodeRedisRepository = emailCodeRedisRepository;
         this.userService = userService;
         this.javaMailSender = javaMailSender;
