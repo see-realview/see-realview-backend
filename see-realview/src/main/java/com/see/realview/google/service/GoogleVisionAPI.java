@@ -61,12 +61,8 @@ public class GoogleVisionAPI {
 
         List<String> responses;
 
-        try {
-            StringBuilder result = getVisionAPIResponse(items);
-            responses = parseVisionAPIResponse(result);
-        } catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
-        }
+        StringBuilder result = getVisionAPIResponse(items);
+        responses = parseVisionAPIResponse(result);
 
         Collections.reverse(responses);
         Queue<String> resultQueue = new LinkedList<>(responses);
@@ -98,43 +94,52 @@ public class GoogleVisionAPI {
         return posts;
     }
 
-    private StringBuilder getVisionAPIResponse(List<RequestItem> items) throws JsonProcessingException {
-        String body = objectMapper.writeValueAsString(new VisionRequest(items));
-        StringBuilder result = new StringBuilder();
+    private StringBuilder getVisionAPIResponse(List<RequestItem> items) {
+        try {
+            String body = objectMapper.writeValueAsString(new VisionRequest(items));
+            StringBuilder result = new StringBuilder();
 
-        googleWebClient
-                .post()
-                .uri(uriBuilder -> uriBuilder.queryParam("key", GCP_KEY).build())
-                .bodyValue(body)
-                .retrieve()
-                .bodyToFlux(String.class)
-                .toStream()
-                .forEach(result::append);
+            googleWebClient
+                    .post()
+                    .uri(uriBuilder -> uriBuilder.queryParam("key", GCP_KEY).build())
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToFlux(String.class)
+                    .toStream()
+                    .forEach(result::append);
 
-        return result;
+            return result;
+        }
+        catch (JsonProcessingException e) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
     }
 
-    private List<String> parseVisionAPIResponse(StringBuilder result) throws JsonProcessingException {
-        List<String> responses = new ArrayList<>();
-        JsonNode rootNode = objectMapper.readTree(result.toString());
-        JsonNode responsesNode = rootNode.path("responses");
+    private List<String> parseVisionAPIResponse(StringBuilder result) {
+        try {
+            List<String> responses = new ArrayList<>();
+            JsonNode rootNode = objectMapper.readTree(result.toString());
+            JsonNode responsesNode = rootNode.path("responses");
 
-        responsesNode.forEach(node -> {
-            JsonNode textAnnotationsNode = node.path("textAnnotations");
-            JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
-            if (firstTextAnnotation != null) {
-                String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
-                responses.add(description);
-            }
-        });
+            responsesNode.forEach(node -> {
+                JsonNode textAnnotationsNode = node.path("textAnnotations");
+                JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
+                if (firstTextAnnotation != null) {
+                    String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
+                    responses.add(description);
+                }
+            });
 
-        return responses;
+            return responses;
+        }
+        catch (JsonProcessingException e) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
     }
 
     private boolean getImageParseResponse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
-            System.out.println(parseRequest.request().link() + "\t " + imageText + "\t " + parseRequest.url());
 
             return textParser.analyzeImageText(imageText);
         }
