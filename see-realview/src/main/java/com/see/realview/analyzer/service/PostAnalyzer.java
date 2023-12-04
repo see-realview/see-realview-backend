@@ -12,6 +12,7 @@ import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import com.see.realview.search.entity.SearchItem;
 import com.see.realview.search.repository.SearchItemRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class PostAnalyzer {
 
     private final RequestConverter requestConverter;
@@ -72,29 +74,35 @@ public class PostAnalyzer {
                     texts.add(new Pair<>(request.link(), text));
                     Boolean advertisement = textParser.analyzePostText(text);
                     if (advertisement) {
+                        log.debug("텍스트에서 광고 확인됨 | " + request.link());
                         return new ImageParseRequest(request, false, null, true);
                     }
 
                     Elements images = components.select("img");
-                    Element image = images.get(images.size() - 1);
 
-                    String url = image.attr("src");
-                    String rawURL = url.replaceAll("\\?.*$", "");
+                    if (images.size() > 0) {
+                        Element image = images.get(images.size() - 1);
 
-                    Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
-                    if (cachedImage.isPresent()) {
-                        ImageData cachedData = cachedImage.get().data();
-                        return new ImageParseRequest(request, false, rawURL, cachedData.advertisement());
+                        String url = image.attr("src");
+                        String rawURL = url.replaceAll("\\?.*$", "");
+
+                        Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
+                        if (cachedImage.isPresent()) {
+                            ImageData cachedData = cachedImage.get().data();
+                            log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
+                            return new ImageParseRequest(request, false, rawURL, cachedData.advertisement());
+                        }
+
+                        if (url.contains("static.map") || // 지도 정보 제외
+                                url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
+                                url.contains(".gif")) { // GIF 파일 제외
+                            return new ImageParseRequest(request, false, null, false);
+                        }
+
+                        return new ImageParseRequest(request, true, url, false);
                     }
 
-                    if (url.contains("static.map") || // 지도 정보 제외
-                            url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
-                            url.contains("postfiles.pstatic.net") || // 블로그 이미지 제외
-                            url.contains(".gif")) { // GIF 파일 제외
-                        return new ImageParseRequest(request, false, null, false);
-                    }
-
-                    return new ImageParseRequest(request, true, url, false);
+                    return new ImageParseRequest(request, false, null, false);
                 })
                 .toList();
 
@@ -110,6 +118,7 @@ public class PostAnalyzer {
                 })
                 .toList();
         searchItemRepository.saveAll(searchItems);
+//        parsedImageService.rebase();
 
         return new AnalyzeResponse(cursor, analyzePostResponse);
     }

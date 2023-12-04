@@ -16,6 +16,7 @@ import com.see.realview.google.dto.VisionRequest;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.image.service.ParsedImageServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.*;
 
 @Service
+@Slf4j
 public class GoogleVisionAPI {
 
     private final ParsedImageService parsedImageService;
@@ -85,6 +87,7 @@ public class GoogleVisionAPI {
                         }
                     }
 
+                    log.debug("OCR 진행됨 | " + parseRequest.request().link());
                     return PostDTO.of(parseRequest, advertisement, 0L);
                 })
                 .toList();
@@ -128,6 +131,7 @@ public class GoogleVisionAPI {
                     String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
                     responses.add(description);
                 }
+                else responses.add("");
             });
 
             return responses;
@@ -140,7 +144,7 @@ public class GoogleVisionAPI {
     private boolean getImageParseResponse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
-
+            System.out.println(parseRequest.url() + " | " + imageText);
             return textParser.analyzeImageText(imageText);
         }
 
