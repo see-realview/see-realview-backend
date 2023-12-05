@@ -4,6 +4,7 @@ import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview._core.security.JwtProvider;
 import com.see.realview.token.entity.Token;
+import com.see.realview.token.repository.TokenRedisRepository;
 import com.see.realview.token.repository.TokenRedisRepositoryImpl;
 import com.see.realview.user.entity.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenServiceImpl implements TokenService {
 
-    private final TokenRedisRepositoryImpl tokenRedisRepository;
+    private final TokenRedisRepository tokenRedisRepository;
 
     private final JwtProvider jwtProvider;
 
 
-    public TokenServiceImpl(@Autowired TokenRedisRepositoryImpl tokenRedisRepository,
+    public TokenServiceImpl(@Autowired TokenRedisRepository tokenRedisRepository,
                             @Autowired JwtProvider jwtProvider) {
         this.tokenRedisRepository = tokenRedisRepository;
         this.jwtProvider = jwtProvider;

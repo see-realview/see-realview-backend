@@ -10,14 +10,12 @@
 </br>
 
 ## 현재 진행 중인 사항
-- [x] ERD 설계
 - [ ] API 설계
 - [ ] 와이어프레임 구체화
-- [x] 네이버 검색 API 구현
-- [x] 블로그 포스트 분석 메서드 구현
 - [ ] 음식점 검색 API 구현
 - [ ] 지도 위치 검색 API 구현
 - [ ] 포스트 분석 알고리즘 강화
+- [ ] 한국어 자연어 전처리
 
 </br>
 
@@ -25,7 +23,7 @@
 > Require
 > - JDK 17
 > - Spring 3.1.4
-> - GOOGLE_APPLICATION_CREDENTIALS, KAKAO_SEARCH_KEY, NAVER_SEARCH_ID, NAVER_SEARCH_SECRET, ACCESS_SECRET, REFRESH_SECRET 환경변수가 등록되어 있어야 합니다.
+> - GOOGLE_APPLICATION_CREDENTIALS, KAKAO_SEARCH_KEY, NAVER_SEARCH_ID, NAVER_SEARCH_SECRET, ACCESS_SECRET, REFRESH_SECRET, GMAIL_SENDER, GMAIL_PASSWORD 환경변수가 등록되어 있어야 합니다.
 > - ACCESS_SECRET, REFRESH_SECRET은 256bits 이상의 길이어야 합니다.
 
 1. clone project
@@ -63,6 +61,8 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 ## 변경 로그 소개
 - 2023.10.19 : 백엔드 프로젝트 초기 설정 [#7](https://github.com/see-realview/see-realview-backend/issues/7)
 - 2023.11.24 : 블로그 포스트 분석 기능 구현 [#10](https://github.com/see-realview/see-realview-backend/issues/10)
+- 2023.11.29 : 회원가입 이메일 인증 로직 구현 [#13](https://github.com/see-realview/see-realview-backend/issues/13)
+- 2023.11.29 : 블로그 포스트의 텍스트 기반 리뷰 판별 모델 3종 비교 [#15](https://github.com/see-realview/see-realview-backend/issues/15)
 
 </br>
 

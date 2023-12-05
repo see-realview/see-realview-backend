@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -92,6 +93,10 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     }
 
     private String getKeyByURL(String url) {
+        if (url.startsWith(IMAGE_PREFIX)) {
+            return url;
+        }
+
         return IMAGE_PREFIX + url;
     }
 

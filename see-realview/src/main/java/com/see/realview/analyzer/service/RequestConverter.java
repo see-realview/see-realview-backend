@@ -60,10 +60,25 @@ public class RequestConverter {
                 .parallel()
                 .mapToObj(idx -> {
                     ImageParseRequest request = requests.get(idx);
-                    RequestImage image = new RequestImage(getEncodedImageFromURL(request.url()));
+                    String url = request.url();
+
+                    if (!request.required()) {
+                        url = null;
+                    }
+
+                    RequestImage image = new RequestImage(getEncodedImageFromURL(url));
                     RequestItem requestItem = new RequestItem(image, requestFeatures);
                     return new RequestIterator(requestItem, idx);
                 })
+                .toList();
+    }
+
+    public List<RequestItem> getRequestItems(List<RequestIterator> requestPairs) {
+        return requestPairs
+                .stream()
+                .sorted(Comparator.comparing(RequestIterator::index).reversed())
+                .map(RequestIterator::item)
+                .filter(item -> item.image().content() != null)
                 .toList();
     }
 
@@ -84,14 +99,5 @@ public class RequestConverter {
             exception.printStackTrace();
             throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
         }
-    }
-
-    public List<RequestItem> getRequestItems(List<RequestIterator> requestPairs) {
-        return requestPairs
-                .stream()
-                .sorted(Comparator.comparing(RequestIterator::index).reversed())
-                .map(RequestIterator::item)
-                .filter(item -> item.image().content() != null)
-                .toList();
     }
 }

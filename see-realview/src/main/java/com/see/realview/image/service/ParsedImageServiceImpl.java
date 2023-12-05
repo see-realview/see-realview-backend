@@ -5,8 +5,8 @@ import com.see.realview._core.exception.client.NotFoundException;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.repository.ParsedImageRedisRepositoryImpl;
-import com.see.realview.image.repository.ParsedImageRepositoryImpl;
+import com.see.realview.image.repository.ParsedImageRedisRepository;
+import com.see.realview.image.repository.ParsedImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +17,13 @@ import java.util.Optional;
 @Service
 public class ParsedImageServiceImpl implements ParsedImageService {
 
-    private final ParsedImageRepositoryImpl parsedImageRepository;
+    private final ParsedImageRepository parsedImageRepository;
 
-    private final ParsedImageRedisRepositoryImpl parsedImageRedisRepository;
+    private final ParsedImageRedisRepository parsedImageRedisRepository;
 
 
-    public ParsedImageServiceImpl(@Autowired ParsedImageRepositoryImpl parsedImageRepository,
-                                  @Autowired ParsedImageRedisRepositoryImpl parsedImageRedisRepository) {
+    public ParsedImageServiceImpl(@Autowired ParsedImageRepository parsedImageRepository,
+                                  @Autowired ParsedImageRedisRepository parsedImageRedisRepository) {
         this.parsedImageRepository = parsedImageRepository;
         this.parsedImageRedisRepository = parsedImageRedisRepository;
     }
@@ -100,7 +100,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
         parsedImageRepository
                 .findCachingImages()
                 .forEach(image -> {
-                    ImageData imageData = new ImageData(image.getAdvertisement(), image.getCount());
+                    ImageData imageData = new ImageData(image.getAdvertisement(), 0L);
                     CachedImage cachedImage = new CachedImage(image.getUrl(), imageData);
 
                     parsedImageRedisRepository.save(cachedImage);

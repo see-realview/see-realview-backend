@@ -1,7 +1,7 @@
 package com.see.realview._core.security;
 
 import com.see.realview._core.utils.ExceptionResponseWriter;
-import com.see.realview.token.service.TokenServiceImpl;
+import com.see.realview.token.service.TokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -10,13 +10,13 @@ public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSe
 
     private final JwtProvider jwtProvider;
 
-    private final TokenServiceImpl tokenService;
+    private final TokenService tokenService;
 
     private final ExceptionResponseWriter responseWriter;
 
 
     public CustomSecurityFilterManager(JwtProvider jwtProvider,
-                                       TokenServiceImpl tokenService,
+                                       TokenService tokenService,
                                        ExceptionResponseWriter responseWriter) {
         this.jwtProvider = jwtProvider;
         this.tokenService = tokenService;

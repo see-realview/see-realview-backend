@@ -14,7 +14,9 @@ import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
 import com.see.realview.google.dto.VisionRequest;
 import com.see.realview.image.entity.ParsedImage;
+import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.image.service.ParsedImageServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +26,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.*;
 
 @Service
+@Slf4j
 public class GoogleVisionAPI {
 
-    private final ParsedImageServiceImpl parsedImageService;
+    private final ParsedImageService parsedImageService;
 
     private final RequestConverter requestConverter;
 
@@ -42,7 +45,7 @@ public class GoogleVisionAPI {
     private final static List<RequestFeature> requestFeatures = List.of(new RequestFeature("TEXT_DETECTION"));
 
 
-    public GoogleVisionAPI(@Autowired ParsedImageServiceImpl parsedImageService,
+    public GoogleVisionAPI(@Autowired ParsedImageService parsedImageService,
                            @Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
                            @Autowired RequestConverter requestConverter,
                            @Autowired TextParser textParser,
@@ -60,12 +63,8 @@ public class GoogleVisionAPI {
 
         List<String> responses;
 
-        try {
-            StringBuilder result = getVisionAPIResponse(items);
-            responses = parseVisionAPIResponse(result);
-        } catch (JsonProcessingException e) {
-            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
-        }
+        StringBuilder result = getVisionAPIResponse(items);
+        responses = parseVisionAPIResponse(result);
 
         Collections.reverse(responses);
         Queue<String> resultQueue = new LinkedList<>(responses);
@@ -75,17 +74,20 @@ public class GoogleVisionAPI {
         List<PostDTO> posts =  requests.stream()
                 .map(parseRequest -> {
                     boolean advertisement = getImageParseResponse(resultQueue, parseRequest);
+                    String url = parseRequest.url();
 
-                    if (advertisement) {
-                        images.add(
-                                ParsedImage.builder()
-                                        .url(parseRequest.url())
-                                        .advertisement(true)
-                                        .count(1L)
-                                        .build()
-                        );
+                    if (parseRequest.required()) {
+                        String rawURL = url.replaceAll("\\?.*$", "");
+                        images.add(ParsedImage.of(rawURL, advertisement));
+                    }
+                    else {
+                        advertisement = parseRequest.advertisement();
+                        if (url != null) {
+                            images.add(ParsedImage.of(url, advertisement));
+                        }
                     }
 
+                    log.debug("OCR 진행됨 | " + parseRequest.request().link());
                     return PostDTO.of(parseRequest, advertisement, 0L);
                 })
                 .toList();
@@ -95,44 +97,54 @@ public class GoogleVisionAPI {
         return posts;
     }
 
-    private StringBuilder getVisionAPIResponse(List<RequestItem> items) throws JsonProcessingException {
-        String body = objectMapper.writeValueAsString(new VisionRequest(items));
-        StringBuilder result = new StringBuilder();
+    private StringBuilder getVisionAPIResponse(List<RequestItem> items) {
+        try {
+            String body = objectMapper.writeValueAsString(new VisionRequest(items));
+            StringBuilder result = new StringBuilder();
 
-        googleWebClient
-                .post()
-                .uri(uriBuilder -> uriBuilder.queryParam("key", GCP_KEY).build())
-                .bodyValue(body)
-                .retrieve()
-                .bodyToFlux(String.class)
-                .toStream()
-                .forEach(result::append);
+            googleWebClient
+                    .post()
+                    .uri(uriBuilder -> uriBuilder.queryParam("key", GCP_KEY).build())
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToFlux(String.class)
+                    .toStream()
+                    .forEach(result::append);
 
-        return result;
+            return result;
+        }
+        catch (JsonProcessingException e) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
     }
 
-    private List<String> parseVisionAPIResponse(StringBuilder result) throws JsonProcessingException {
-        List<String> responses = new ArrayList<>();
-        JsonNode rootNode = objectMapper.readTree(result.toString());
-        JsonNode responsesNode = rootNode.path("responses");
+    private List<String> parseVisionAPIResponse(StringBuilder result) {
+        try {
+            List<String> responses = new ArrayList<>();
+            JsonNode rootNode = objectMapper.readTree(result.toString());
+            JsonNode responsesNode = rootNode.path("responses");
 
-        responsesNode.forEach(node -> {
-            JsonNode textAnnotationsNode = node.path("textAnnotations");
-            JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
-            if (firstTextAnnotation != null) {
-                String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
-                responses.add(description);
-            }
-        });
+            responsesNode.forEach(node -> {
+                JsonNode textAnnotationsNode = node.path("textAnnotations");
+                JsonNode firstTextAnnotation = textAnnotationsNode.get(0);
+                if (firstTextAnnotation != null) {
+                    String description = firstTextAnnotation.path("description").asText().replaceAll("\\n", " ");
+                    responses.add(description);
+                }
+                else responses.add("");
+            });
 
-        return responses;
+            return responses;
+        }
+        catch (JsonProcessingException e) {
+            throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
+        }
     }
 
     private boolean getImageParseResponse(Queue<String> resultQueue, ImageParseRequest parseRequest) {
         if (parseRequest.required()) {
             String imageText = resultQueue.poll();
-            System.out.println(parseRequest.request().link() + "\t " + imageText + "\t " + parseRequest.url());
-
+            System.out.println(parseRequest.url() + " | " + imageText);
             return textParser.analyzeImageText(imageText);
         }
 
