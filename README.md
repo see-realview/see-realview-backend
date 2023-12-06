@@ -16,6 +16,7 @@
 - [ ] 지도 위치 검색 API 구현
 - [ ] 포스트 분석 알고리즘 강화
 - [ ] 한국어 자연어 전처리
+- [ ] 포스트 북마크 기능 구현
 
 </br>
 
@@ -63,6 +64,7 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 - 2023.11.24 : 블로그 포스트 분석 기능 구현 [#10](https://github.com/see-realview/see-realview-backend/issues/10)
 - 2023.11.29 : 회원가입 이메일 인증 로직 구현 [#13](https://github.com/see-realview/see-realview-backend/issues/13)
 - 2023.11.29 : 블로그 포스트의 텍스트 기반 리뷰 판별 모델 3종 비교 [#15](https://github.com/see-realview/see-realview-backend/issues/15)
+- 2023.12.05 : redis 캐싱 버그 수정 [#19](https://github.com/see-realview/see-realview-backend/issues/19)
 
 </br>
 
