@@ -10,9 +10,11 @@ import com.see.realview._core.utils.ExceptionResponseWriter;
 import com.see.realview.token.service.TokenService;
 import com.see.realview.token.service.TokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -47,6 +49,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers(
+                        PathRequest
+                                .toStaticResources()
+                                .atCommonLocations()
+                )
+                .requestMatchers(
+                        new AntPathRequestMatcher("/static/css/**"),
+                        new AntPathRequestMatcher("/static/scripts/**")
+                );
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
@@ -77,10 +93,13 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers(
-                                new AntPathRequestMatcher("/user/register"),
-                                new AntPathRequestMatcher("/user/login"),
-                                new AntPathRequestMatcher("/search/**"),
-                                new AntPathRequestMatcher("/email/**")
+                                new AntPathRequestMatcher("/"),
+                                new AntPathRequestMatcher("/login"),
+                                new AntPathRequestMatcher("/api/user/register"),
+                                new AntPathRequestMatcher("/api/user/login"),
+                                new AntPathRequestMatcher("/api/token"),
+                                new AntPathRequestMatcher("/api/search/**"),
+                                new AntPathRequestMatcher("/api/email/**")
                         ).permitAll()
                         .anyRequest().authenticated()
         );
