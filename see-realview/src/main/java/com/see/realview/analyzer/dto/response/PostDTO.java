@@ -12,11 +12,14 @@ public record PostDTO(
         Long recommendationCount
 ) {
     public static PostDTO of(ImageParseRequest parseRequest, Boolean advertisement, Long recommendationCount) {
+        String date = parseRequest.request().date();
+        String formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+
         return new PostDTO(
                 parseRequest.request().link(),
-                parseRequest.request().title(),
-                parseRequest.request().description(),
-                parseRequest.request().date(),
+                parseRequest.request().title().replaceAll("<[^>]*>", "").replaceAll("\"<[^>]*>|&[a-zA-Z0-9]+;\"", ""),
+                parseRequest.request().description().replaceAll("<[^>]*>", ""),
+                formattedDate,
                 parseRequest.request().bloggerName(),
                 advertisement,
                 0L
