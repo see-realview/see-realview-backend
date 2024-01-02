@@ -4,25 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
             var keyword = searchInput.value;
-            searchApiRequest(keyword);
+            searchApiRequest(keyword, 1);
             event.target.blur();
         }
     });
 });
 
-function searchApiRequest(keyword) {
-    var apiUrl = 'http://localhost:8080/api/search';
-    var requestData = {
-        keyword: keyword,
-        cursor: 1
-    };
+function searchApiRequest(keyword, cursor) {
+    const apiUrl = 'http://localhost:8080/api/search?keyword=' + keyword + "&cursor=" + cursor;
 
     fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
+        method: 'GET',
     })
         .then(response => response.json())
         .then(data => {
