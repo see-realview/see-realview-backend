@@ -1,4 +1,4 @@
-package com.see.realview.image.repository;
+package com.see.realview.image.repository.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,7 @@ import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
+import com.see.realview.image.repository.ParsedImageRedisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -1,6 +1,6 @@
 package com.see.realview._core.utils;
 
-import com.see.realview.image.repository.ParsedImageRepositoryImpl;
+import com.see.realview.image.repository.impl.ParsedImageRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

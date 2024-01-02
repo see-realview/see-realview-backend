@@ -1,8 +1,9 @@
-package com.see.realview.image.repository;
+package com.see.realview.image.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.entity.QParsedImage;
+import com.see.realview.image.repository.ParsedImageRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
