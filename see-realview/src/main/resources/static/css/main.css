@@ -1,0 +1,69 @@
+body {
+    margin: 0 20px;
+}
+
+.main-container {
+    width: calc(100vw - 40px);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /*justify-content: center;*/
+    align-items: center;
+}
+
+.main-title {
+    margin-top: 40px;
+}
+
+#input-wrap {
+    width: calc(100vw - 40px);
+    display: flex;
+    justify-content: center;
+}
+
+#search-input {
+    width: calc(100vw - 40px - 48px);
+    height: 20px;
+    max-width: 500px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 20px;
+    background-color: #EEEEEE;
+    font-size: 16px;
+}
+
+#search-input:focus {
+    outline: none;
+}
+
+.search-container {
+    margin: 0 20px 20px 20px;
+}
+
+.search-result {
+    display: flex;
+    flex-direction: column;
+    margin: 20px 20px;
+    padding: 20px 20px;
+    width: calc(100vw - 40px - 48px);
+    max-width: 500px;
+    border: 1px black solid;
+    border-radius: 10px;
+}
+
+.search-result a {
+    margin: 20px 0 0 0;
+}
+
+.search-result p {
+    margin: 20px 0;
+}
+
+.search-result span {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.advertisement, .date, .blogger-name {
+    margin: 0 0;
+}
