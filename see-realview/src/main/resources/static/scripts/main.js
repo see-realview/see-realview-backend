@@ -4,7 +4,9 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
             var keyword = searchInput.value;
-            searchApiRequest(keyword, 1);
+            if (keyword !== "") {
+                searchApiRequest(keyword, 1);
+            }
             event.target.blur();
         }
     });
@@ -37,6 +39,7 @@ function updateSearchResults(responseData) {
 
             var link = document.createElement('a');
             link.href = item.url;
+            link.target = '_blank'
             link.textContent = item.title;
 
             var description = document.createElement('p');
@@ -48,16 +51,11 @@ function updateSearchResults(responseData) {
 
             var dateElement = document.createElement('span');
             dateElement.classList.add('date');
-            dateElement.textContent = 'Date: ' + item.date;
-
-            var bloggerNameElement = document.createElement('span');
-            bloggerNameElement.classList.add('blogger-name');
-            bloggerNameElement.textContent = 'Blogger: ' + item.bloggerName;
+            dateElement.textContent = item.bloggerName + " | " + item.date;
 
             listItem.appendChild(advertisementElement);
             listItem.appendChild(link);
             listItem.appendChild(description);
-            listItem.appendChild(bloggerNameElement);
             listItem.appendChild(dateElement);
             searchContainer.appendChild(listItem);
         });
