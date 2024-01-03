@@ -96,11 +96,14 @@ public class SecurityConfig {
                 authorizeHttpRequests
                         .requestMatchers(
                                 new AntPathRequestMatcher("/"),
+                                new AntPathRequestMatcher("/bug-report"),
+                                new AntPathRequestMatcher("/about"),
                                 new AntPathRequestMatcher("/api/user/register"),
                                 new AntPathRequestMatcher("/api/user/login"),
                                 new AntPathRequestMatcher("/api/token"),
                                 new AntPathRequestMatcher("/api/search/**"),
-                                new AntPathRequestMatcher("/api/email/**")
+                                new AntPathRequestMatcher("/api/email/**"),
+                                new AntPathRequestMatcher("/api/report/**")
                         ).permitAll()
                         .anyRequest().authenticated()
         );
