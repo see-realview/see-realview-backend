@@ -1,15 +1,39 @@
+let loading = false;
+let timer;
+
+
 document.addEventListener("DOMContentLoaded", function () {
-    var searchInput = document.getElementById('search-input');
+    const searchInput = document.getElementById('search-input');
 
     searchInput.addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
-            var keyword = searchInput.value;
-            if (keyword !== "") {
+            const keyword = searchInput.value;
+            if (keyword !== "" && !loading) {
+                loading = true;
                 searchApiRequest(keyword, 1);
             }
             event.target.blur();
         }
     });
+});
+
+window.addEventListener('scroll', function () {
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = document.documentElement.scrollTop;
+    const clientHeight = document.documentElement.clientHeight;
+
+    if (scrollHeight - scrollTop - 1000 <= clientHeight && !loading) {
+        const keyword = document.getElementById('search-input').value;
+        const cursor = localStorage.getItem("cursor");
+
+        if (!timer) {
+            timer = setTimeout(() => {
+                searchApiRequest(keyword, cursor);
+                timer = null;
+            }, 200);
+        }
+        loading = true;
+    }
 });
 
 function searchApiRequest(keyword, cursor) {
@@ -21,35 +45,36 @@ function searchApiRequest(keyword, cursor) {
         .then(response => response.json())
         .then(data => {
             updateSearchResults(data);
+            loading = false;
         })
         .catch(error => {
             console.error('Error during API request:', error);
+            loading = false;
         });
 }
 
 function updateSearchResults(responseData) {
-    var searchContainer = document.querySelector('.search-container');
-
-    searchContainer.innerHTML = '';
+    const searchContainer = document.querySelector('.search-container');
 
     if (responseData.success && responseData.contents.data) {
+        localStorage.setItem("cursor", responseData.contents.cursor);
         responseData.contents.data.forEach(function (item) {
-            var listItem = document.createElement('div');
+            const listItem = document.createElement('div');
             listItem.classList.add('search-result');
 
             var link = document.createElement('a');
             link.href = item.url;
-            link.target = '_blank'
-            link.textContent = item.title;
+            link.target = '_blank';
+            link.innerHTML = item.title;
 
-            var description = document.createElement('p');
-            description.textContent = item.description;
+            const description = document.createElement('p');
+            description.innerHTML = item.description;
 
-            var advertisementElement = document.createElement('span');
+            const advertisementElement = document.createElement('span');
             advertisementElement.classList.add('advertisement');
             advertisementElement.textContent = item.advertisement ? '광고' : '내돈내산';
 
-            var dateElement = document.createElement('span');
+            const dateElement = document.createElement('span');
             dateElement.classList.add('date');
             dateElement.textContent = item.bloggerName + " | " + item.date;
 

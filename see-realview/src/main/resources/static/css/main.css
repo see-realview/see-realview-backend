@@ -7,7 +7,37 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    /*justify-content: center;*/
+    align-items: center;
+}
+
+#navigation {
+    width: calc(100vw - 80px);
+    max-width: 500px;
+    margin: 0 40px 40px 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.menu-link {
+    text-decoration: none;
+    color: black;
+    margin: 20px 20px;
+}
+
+.menu-link:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+.menu-link:visited {
+    text-decoration: none;
+    color: black;
+}
+
+#left-items {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
 }
 
@@ -16,8 +46,9 @@ body {
 }
 
 #notice {
-    font-size: 10px;
-    margin: 10px 0;
+    font-size: 12px;
+    margin: 60px 0 20px 0;
+    text-align: center;
 }
 
 #input-wrap {

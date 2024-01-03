@@ -1,16 +1,59 @@
 body {
-    margin: 0;
+    margin: 0 20px;
 }
 
-h1 {
+.report-container {
+    width: calc(100vw - 40px);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#navigation {
+    width: calc(100vw - 80px);
+    max-width: 500px;
+    margin: 0 40px 40px 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.menu-link {
+    text-decoration: none;
+    color: black;
+    margin: 20px 20px;
+}
+
+.menu-link:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+.menu-link:visited {
+    text-decoration: none;
+    color: black;
+}
+
+#left-items {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+h2 {
     text-align: center;
     color: #333;
+    margin: 40px 0 20px 0;
 }
 
 form {
     max-width: 600px;
     margin: 20px auto;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 label {
@@ -35,6 +78,7 @@ textarea {
 
 textarea {
     height: 200px;
+    resize: none;
 }
 
 button {
