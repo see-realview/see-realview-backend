@@ -78,7 +78,7 @@ public class RequestConverter {
                 .stream()
                 .sorted(Comparator.comparing(RequestIterator::index).reversed())
                 .map(RequestIterator::item)
-                .filter(item -> item.image().content() != null)
+                .filter(item -> item.image().content() != null && !item.image().content().equals(""))
                 .toList();
     }
 

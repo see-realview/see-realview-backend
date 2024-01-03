@@ -17,8 +17,8 @@ public record PostDTO(
 
         return new PostDTO(
                 parseRequest.request().link(),
-                parseRequest.request().title().replaceAll("<[^>]*>", "").replaceAll("\"<[^>]*>|&[a-zA-Z0-9]+;\"", ""),
-                parseRequest.request().description().replaceAll("<[^>]*>", ""),
+                parseRequest.request().title(),
+                parseRequest.request().description(),
                 formattedDate,
                 parseRequest.request().bloggerName(),
                 advertisement,
