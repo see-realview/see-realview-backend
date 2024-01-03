@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>see-realview | report</title>
+    <link type="text/css" th:href="@{../static/css/bug-report.css}" rel="stylesheet">
+    <script type="text/javascript" th:src="@{../static/scripts/bug-report.js}"></script>
+</head>
+<body>
+    <div class="report-container">
+        <h1>Bug Report</h1>
+        <form id="bugReportForm">
+            <label for="subject">제목</label>
+            <input type="text" id="subject" name="subject" required>
+
+            <label for="content">내용</label>
+            <textarea id="content" name="content" required></textarea>
+
+            <button type="button" onclick="sendEmail()">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -10,4 +10,14 @@ public class AppController {
     public String home() {
         return "main";
     }
+
+    @GetMapping("/bug-report")
+    public String bugReport() {
+        return "bug-report";
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about";
+    }
 }
