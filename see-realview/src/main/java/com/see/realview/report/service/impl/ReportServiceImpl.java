@@ -15,6 +15,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -37,14 +39,33 @@ public class ReportServiceImpl implements ReportService {
         try {
             String reportTitle = type.toString() + " " + request.title();
             MimeMessage message = javaMailSender.createMimeMessage();
+            String content = replaceExpletives(request.content());
+
             message.setFrom(new InternetAddress(SENDER, "see-realview"));
             message.addRecipients(Message.RecipientType.TO, RECEIVER);
             message.setSubject(reportTitle);
-            message.setText(request.content(), "utf-8", "text");
+            message.setText(content, "utf-8", "text");
             javaMailSender.send(message);
         }
         catch (MessagingException | UnsupportedEncodingException exception) {
             throw new ServerException(ExceptionStatus.EMAIL_CONTENT_CREATE_ERROR);
         }
+    }
+
+    @Override
+    public String replaceExpletives(String content) {
+        // TODO: 비속어 DB 연결하기
+        String expletives = "(욕1|욕2|욕3)";
+
+        Pattern pattern = Pattern.compile(expletives, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(content);
+
+        StringBuilder replacedContent = new StringBuilder();
+        while (matcher.find()) {
+            matcher.appendReplacement(replacedContent, "*");
+        }
+        matcher.appendTail(replacedContent);
+
+        return replacedContent.toString();
     }
 }
