@@ -1,8 +1,8 @@
-package com.see.realview.analyzer.service;
+package com.see.realview.search.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
-import com.see.realview.analyzer.dto.request.AnalyzeRequest;
+import com.see.realview.search.dto.request.AnalyzeRequest;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

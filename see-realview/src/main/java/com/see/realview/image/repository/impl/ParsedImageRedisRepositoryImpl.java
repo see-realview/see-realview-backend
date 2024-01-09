@@ -16,7 +16,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -76,7 +75,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
 
     @Override
     public void save(CachedImage image) {
-        String key = getKeyByURL(image.url());
+        String key = getKeyByURL(image.link());
         String value = getValue(image);
 
         valueOperations.set(key, value);

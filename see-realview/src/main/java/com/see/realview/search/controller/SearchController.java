@@ -1,8 +1,8 @@
 package com.see.realview.search.controller;
 
 import com.see.realview._core.response.Response;
-import com.see.realview.analyzer.dto.response.AnalyzeResponse;
-import com.see.realview.analyzer.service.PostAnalyzer;
+import com.see.realview.search.dto.response.AnalyzeResponse;
+import com.see.realview.search.service.PostAnalyzer;
 import com.see.realview.search.dto.request.KeywordSearchRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import com.see.realview.search.service.NaverSearcher;

@@ -1,9 +1,9 @@
-package com.see.realview.analyzer.service;
+package com.see.realview.search.service;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class TextParser {
+public class TextAnalyzer {
 
     public Boolean analyzePostText(String text) {
         return (text.contains("제공받") || text.contains("지원받")) ||

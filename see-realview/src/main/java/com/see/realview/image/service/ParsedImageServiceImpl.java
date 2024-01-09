@@ -43,8 +43,8 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     }
 
     @Override
-    public Optional<ParsedImage> findByURL(String url) {
-        Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(url);
+    public Optional<ParsedImage> findByURL(String link) {
+        Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(link);
 
         if (cachedImage.isEmpty()) {
             return Optional.empty();
@@ -52,7 +52,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
 
         CachedImage image = cachedImage.get();
         ParsedImage parsedImage = ParsedImage.builder()
-                .url(url)
+                .link(link)
                 .advertisement(image.data().advertisement())
                 .count(image.data().count())
                 .build();
@@ -78,6 +78,10 @@ public class ParsedImageServiceImpl implements ParsedImageService {
 
     @Override
     public void saveAll(List<ParsedImage> images) {
+        if (images.isEmpty()) {
+            return;
+        }
+
         parsedImageRepository.saveAll(images);
     }
 
@@ -85,7 +89,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     @Transactional
     public void rebase() {
         List<CachedImage> cachedImages = parsedImageRedisRepository.findAll();
-        List<String> urls = cachedImages.stream().map(CachedImage::url).toList();
+        List<String> urls = cachedImages.stream().map(CachedImage::link).toList();
         List<ParsedImage> parsedImages = parsedImageRepository.findAllByUrlIn(urls);
 
         cachedImages
@@ -101,7 +105,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                 .findCachingImages()
                 .forEach(image -> {
                     ImageData imageData = new ImageData(image.getAdvertisement(), 0L);
-                    CachedImage cachedImage = new CachedImage(image.getUrl(), imageData);
+                    CachedImage cachedImage = new CachedImage(image.getLink(), imageData);
 
                     parsedImageRedisRepository.save(cachedImage);
                 });
@@ -110,11 +114,11 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     private static ParsedImage findParsedImage(List<ParsedImage> parsedImages, CachedImage image) {
         return parsedImages
                 .stream()
-                .filter(img -> img.getUrl().equals(image.url()))
+                .filter(img -> img.getLink().equals(image.link()))
                 .findFirst()
                 .orElseGet(() -> {
                     ParsedImage newImage = ParsedImage.builder()
-                            .url(image.url())
+                            .link(image.link())
                             .advertisement(image.data().advertisement())
                             .build();
 

@@ -1,4 +1,4 @@
-package com.see.realview.analyzer.dto.request;
+package com.see.realview.search.dto.request;
 
 public record AnalyzeRequest(
         String link,

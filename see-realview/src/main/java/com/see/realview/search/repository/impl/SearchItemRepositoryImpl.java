@@ -25,9 +25,9 @@ public class SearchItemRepositoryImpl implements SearchItemRepository {
     @Override
     public void saveAll(List<SearchItem> items) {
         String sql = String.format("""
-                    INSERT INTO `%s` (title, url, description, blogger_name, post_date, content, advertisement)
-                    VALUES (:title, :url, :description, :bloggerName, :postDate, :content, :advertisement)
-                    ON DUPLICATE KEY UPDATE title = title, url = url, description = description, blogger_name = blogger_name, post_date = post_date, content = content, advertisement = advertisement
+                    INSERT INTO `%s` (title, link, description, blogger_name, post_date, content, advertisement)
+                    VALUES (:title, :link, :description, :bloggerName, :postDate, :content, :advertisement)
+                    ON DUPLICATE KEY UPDATE title = title, link = link, description = description, blogger_name = blogger_name, post_date = post_date, content = content, advertisement = advertisement
                 """, TABLE);
 
         SqlParameterSource[] parameterSources = items

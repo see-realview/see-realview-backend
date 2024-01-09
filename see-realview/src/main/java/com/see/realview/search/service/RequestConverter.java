@@ -1,9 +1,9 @@
-package com.see.realview.analyzer.service;
+package com.see.realview.search.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
-import com.see.realview.analyzer.dto.request.AnalyzeRequest;
-import com.see.realview.analyzer.dto.request.ImageParseRequest;
+import com.see.realview.search.dto.request.AnalyzeRequest;
+import com.see.realview.search.dto.request.ImageParseRequest;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestImage;
 import com.see.realview.google.dto.RequestItem;
@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 @Component
 public class RequestConverter {
 
-    public List<AnalyzeRequest> convert(NaverSearchResponse response) {
+    public List<AnalyzeRequest> createPostAnalyzeRequest(NaverSearchResponse response) {
         return response.items()
                 .stream()
                 .map(naverSearchItem -> {
@@ -54,21 +54,15 @@ public class RequestConverter {
                 .toList();
     }
 
-    public List<RequestIterator> getRequestIterators(List<ImageParseRequest> requests, List<RequestFeature> requestFeatures) {
+    public List<RequestIterator> getRequestIterators(List<ImageParseRequest> requests, List<RequestFeature> features) {
         return IntStream
                 .range(0, requests.size())
                 .parallel()
                 .mapToObj(idx -> {
                     ImageParseRequest request = requests.get(idx);
-                    String url = request.url();
-
-                    if (!request.required()) {
-                        url = null;
-                    }
-
-                    RequestImage image = new RequestImage(getEncodedImageFromURL(url));
-                    RequestItem requestItem = new RequestItem(image, requestFeatures);
-                    return new RequestIterator(requestItem, idx);
+                    RequestImage image = new RequestImage(getEncodedImageFromURL(request.imageLink()));
+                    RequestItem item = new RequestItem(image, features);
+                    return new RequestIterator(item, idx);
                 })
                 .toList();
     }
@@ -76,7 +70,7 @@ public class RequestConverter {
     public List<RequestItem> getRequestItems(List<RequestIterator> requestPairs) {
         return requestPairs
                 .stream()
-                .sorted(Comparator.comparing(RequestIterator::index).reversed())
+                .sorted(Comparator.comparing(RequestIterator::index))
                 .map(RequestIterator::item)
                 .filter(item -> item.image().content() != null && !item.image().content().equals(""))
                 .toList();

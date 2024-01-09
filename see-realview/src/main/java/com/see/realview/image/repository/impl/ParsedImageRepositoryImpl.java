@@ -41,7 +41,7 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
     public List<ParsedImage> findAllByUrlIn(List<String> urls) {
         return jpaQueryFactory
                 .selectFrom(TABLE)
-                .where(TABLE.url.in(urls))
+                .where(TABLE.link.in(urls))
                 .fetch();
     }
 
@@ -62,9 +62,9 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
     @Override
     public void saveAll(List<ParsedImage> images) {
         String sql = String.format("""
-                INSERT INTO `%s` (url, advertisement, count)
-                VALUES (:url, :advertisement, :count)
-                ON DUPLICATE KEY UPDATE url = :url, advertisement = :advertisement, count = count + :count
+                INSERT INTO `%s` (link, advertisement, count)
+                VALUES (:link, :advertisement, :count)
+                ON DUPLICATE KEY UPDATE link = :link, advertisement = :advertisement, count = count + :count
                 """, PARSED_IMAGE_TABLE);
 
         SqlParameterSource[] parameterSources = images

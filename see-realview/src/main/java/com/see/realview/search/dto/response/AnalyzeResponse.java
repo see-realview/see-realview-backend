@@ -1,4 +1,4 @@
-package com.see.realview.analyzer.dto.response;
+package com.see.realview.search.dto.response;
 
 import java.util.List;
 

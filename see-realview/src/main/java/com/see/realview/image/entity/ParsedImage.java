@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "parsed_image_tb",
         indexes = {
-                @Index(columnList = "url")
+                @Index(columnList = "link")
         })
 @Getter
 @NoArgsConstructor
@@ -20,7 +20,7 @@ public class ParsedImage {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String url;
+    private String link;
 
     @Column(nullable = false)
     private Boolean advertisement;
@@ -30,16 +30,16 @@ public class ParsedImage {
 
 
     @Builder
-    public ParsedImage(Long id, String url, Boolean advertisement, Long count) {
+    public ParsedImage(Long id, String link, Boolean advertisement, Long count) {
         this.id = id;
-        this.url = url;
+        this.link = link;
         this.advertisement = advertisement;
         this.count = count;
     }
 
-    public static ParsedImage of(String url, Boolean advertisement) {
+    public static ParsedImage of(String link, Boolean advertisement) {
         return ParsedImage.builder()
-                .url(url)
+                .link(link)
                 .advertisement(advertisement)
                 .count(1L) // batch update 시에 중복 레코드는 count + 1로 업데이트하기 때문에 디폴트는 항상 1로 고정
                 .build();
