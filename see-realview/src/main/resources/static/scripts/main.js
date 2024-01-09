@@ -4,11 +4,13 @@ let timer;
 
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById('search-input');
+    const searchContainer = document.querySelector('.search-container');
 
     searchInput.addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
             const keyword = searchInput.value;
             if (keyword !== "" && !loading) {
+                searchContainer.innerHTML = '';
                 loading = true;
                 searchApiRequest(keyword, 1);
             }
@@ -63,7 +65,7 @@ function updateSearchResults(responseData) {
             listItem.classList.add('search-result');
 
             var link = document.createElement('a');
-            link.href = item.url;
+            link.href = item.link;
             link.target = '_blank';
             link.innerHTML = item.title;
 
