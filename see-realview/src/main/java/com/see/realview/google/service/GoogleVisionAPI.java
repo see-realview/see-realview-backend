@@ -28,13 +28,9 @@ import java.util.*;
 @Slf4j
 public class GoogleVisionAPI {
 
-    private final ParsedImageService parsedImageService;
-
     private final RequestConverter requestConverter;
 
     private final WebClient googleWebClient;
-
-    private final TextAnalyzer textAnalyzer;
 
     private final ObjectMapper objectMapper;
 
@@ -44,15 +40,11 @@ public class GoogleVisionAPI {
     private final static List<RequestFeature> features = List.of(new RequestFeature("TEXT_DETECTION"));
 
 
-    public GoogleVisionAPI(@Autowired ParsedImageService parsedImageService,
-                           @Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
+    public GoogleVisionAPI(@Autowired @Qualifier("googleWebClient") WebClient googleWebClient,
                            @Autowired RequestConverter requestConverter,
-                           @Autowired TextAnalyzer textAnalyzer,
                            @Autowired ObjectMapper objectMapper) {
-        this.parsedImageService = parsedImageService;
         this.googleWebClient = googleWebClient;
         this.requestConverter = requestConverter;
-        this.textAnalyzer = textAnalyzer;
         this.objectMapper = objectMapper;
     }
 

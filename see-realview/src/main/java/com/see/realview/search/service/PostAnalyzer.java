@@ -87,7 +87,6 @@ public class PostAnalyzer {
                     }
 
                     Elements images = components.select("img");
-
                     if (images.size() == 0) {
                         return;
                     }
@@ -117,11 +116,22 @@ public class PostAnalyzer {
                 });
 
         List<String> visionResponse = googleVisionAPI.call(imageParseRequests);
-        Queue<String> resultQueue = new LinkedList<>(visionResponse);
+        mergeVisionAPIResults(result, imageParseRequests, visionResponse);
+
+        List<PostDTO> responses = createPostResponses(searchResponse, result);
+        savePost(texts, responses);
+
+        Long cursor = searchResponse.start() + responses.size();
+        return new AnalyzeResponse(cursor, responses);
+    }
+
+
+    private void mergeVisionAPIResults(Map<String, Boolean> result, List<ImageParseRequest> imageParseRequests, List<String> visionResponse) {
+        Queue<String> visionResponseQueue = new LinkedList<>(visionResponse);
         List<ParsedImage> images = new ArrayList<>();
 
         imageParseRequests.forEach(request -> {
-            String text = resultQueue.poll();
+            String text = visionResponseQueue.poll();
             log.debug(request.imageLink() + " | " + text);
             boolean advertisement = textAnalyzer.analyzeImageText(text);
 
@@ -134,8 +144,10 @@ public class PostAnalyzer {
 
         parsedImageService.saveAll(images);
         parsedImageService.rebase();
+    }
 
-        List<PostDTO> responses = searchResponse.items()
+    private static List<PostDTO> createPostResponses(NaverSearchResponse searchResponse, Map<String, Boolean> result) {
+        return searchResponse.items()
                 .stream()
                 .map(naverSearchItem -> {
                     String link = naverSearchItem.link();
@@ -143,7 +155,9 @@ public class PostAnalyzer {
                     return PostDTO.of(naverSearchItem, advertisement, 0L);
                 })
                 .toList();
+    }
 
+    private void savePost(List<Pair<String, String>> texts, List<PostDTO> responses) {
         List<SearchItem> searchItems = responses
                 .stream()
                 .map(postDTO -> {
@@ -157,8 +171,5 @@ public class PostAnalyzer {
                 })
                 .toList();
         searchItemRepository.saveAll(searchItems);
-
-        Long cursor = searchResponse.start() + responses.size();
-        return new AnalyzeResponse(cursor, responses);
     }
 }
