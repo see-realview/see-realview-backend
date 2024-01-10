@@ -23,6 +23,7 @@ env:
   GCP_KEY: ${{ secrets.GCP_KEY }}
   GMAIL_SENDER: ${{ secrets.GMAIL_SENDER }}
   GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+  REPORT_RECEIVER_EMAIL: ${{ secrets.REPORT_RECEIVER_EMAIL }}
 
 jobs:
   build:

@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/email")
+@RequestMapping("/api/email")
 public class EmailAuthenticationController {
 
     private final EmailAuthenticationServiceImpl emailCodeService;

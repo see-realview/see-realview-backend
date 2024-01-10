@@ -1,12 +1,10 @@
 package com.see.realview.search.entity;
 
-import com.see.realview.analyzer.dto.response.PostDTO;
+import com.see.realview.search.dto.response.PostDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -23,8 +21,8 @@ public class SearchItem {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "url", unique = true)
-    private String url;
+    @Column(name = "link", unique = true)
+    private String link;
 
     @Column(name = "description")
     private String description;
@@ -42,10 +40,10 @@ public class SearchItem {
     private Boolean advertisement;
 
     @Builder
-    public SearchItem(Long id, String title, String url, String description, String bloggerName, String postDate, String content, Boolean advertisement) {
+    public SearchItem(Long id, String title, String link, String description, String bloggerName, String postDate, String content, Boolean advertisement) {
         this.id = id;
         this.title = title;
-        this.url = url;
+        this.link = link;
         this.description = description;
         this.bloggerName = bloggerName;
         this.postDate = postDate;
@@ -56,7 +54,7 @@ public class SearchItem {
     public static SearchItem of(PostDTO postDTO, String text) {
         return SearchItem.builder()
                 .title(postDTO.title())
-                .url(postDTO.url())
+                .link(postDTO.link())
                 .description(postDTO.description())
                 .bloggerName(postDTO.bloggerName())
                 .postDate(postDTO.date())
