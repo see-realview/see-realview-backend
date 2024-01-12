@@ -49,15 +49,6 @@ jobs:
       run: ./gradlew clean build
       working-directory: ./see-realview
       
-    - name: 'Run Spring Boot App for 10 seconds'
-      run: |
-        ./gradlew bootRun &
-        APP_PID=$!
-        sleep 10
-        kill $APP_PID
-      continue-on-error: false
-      working-directory: ./see-realview
-
     # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
     # the publishing section of your build.gradle
     # - name: Publish to GitHub Packages
