@@ -13,7 +13,8 @@ import org.springframework.test.context.TestPropertySource;
         "api.google.key=1111111111111111111111111111111111111111111111111",
         "api.google.gmail.sender=asdf@asdf.com",
         "api.google.gmail.password=qwer1234",
-        "api.report.receiver-email=qwer1234"
+        "api.report.receiver-email=qwer1234",
+        "redis.host=localhost"
 })
 @SpringBootTest
 class SeeRealviewApplicationTests {
