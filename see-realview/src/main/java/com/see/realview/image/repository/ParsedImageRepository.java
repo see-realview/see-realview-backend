@@ -13,4 +13,6 @@ public interface ParsedImageRepository {
     void save(ParsedImage image);
 
     void saveAll(List<ParsedImage> images);
+
+    Boolean isWellKnownURL(String url);
 }
