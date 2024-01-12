@@ -65,6 +65,8 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 - 2023.11.29 : 회원가입 이메일 인증 로직 구현 [#13](https://github.com/see-realview/see-realview-backend/issues/13)
 - 2023.11.29 : 블로그 포스트의 텍스트 기반 리뷰 판별 모델 3종 비교 [#15](https://github.com/see-realview/see-realview-backend/issues/15)
 - 2023.12.05 : redis 캐싱 버그 수정 [#19](https://github.com/see-realview/see-realview-backend/issues/19)
+- 2024.01.10 : 타임리프를 이용한 페이지 템플릿 추가 [#26](https://github.com/see-realview/see-realview-backend/issues/26)
+- 2024.01.10 : 버그 리포트 기능 구현 [#28](https://github.com/see-realview/see-realview-backend/issues/28)
 
 </br>
 

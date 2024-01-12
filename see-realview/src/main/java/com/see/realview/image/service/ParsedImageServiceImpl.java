@@ -43,6 +43,11 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     }
 
     @Override
+    public Boolean isWellKnownURL(String url) {
+        return parsedImageRepository.isWellKnownURL(url);
+    }
+
+    @Override
     public Optional<ParsedImage> findByURL(String link) {
         Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(link);
 

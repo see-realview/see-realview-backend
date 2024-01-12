@@ -38,8 +38,9 @@ window.addEventListener('scroll', function () {
     }
 });
 
+
 function searchApiRequest(keyword, cursor) {
-    const apiUrl = 'http://localhost:8080/api/search?keyword=' + keyword + "&cursor=" + cursor;
+    const apiUrl = `/api/search?keyword=${keyword}&cursor=${cursor}`;
 
     fetch(apiUrl, {
         method: 'GET',

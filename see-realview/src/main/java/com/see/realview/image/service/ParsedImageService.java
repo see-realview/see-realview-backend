@@ -10,6 +10,8 @@ public interface ParsedImageService {
 
     Optional<CachedImage> isAlreadyParsedImage(String url);
 
+    Boolean isWellKnownURL(String url);
+
     Optional<ParsedImage> findByURL(String url);
 
     void increment(String url);

@@ -24,7 +24,7 @@ function sendEmail() {
         })
         .then(data => {
             // 성공적으로 요청이 완료되었을 때의 처리
-            alert('Bug report submitted successfully!');
+            alert('전송 완료');
             report.innerText = "전송";
         })
         .catch(error => {

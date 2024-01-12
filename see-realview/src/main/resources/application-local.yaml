@@ -6,24 +6,36 @@ server:
   port: 8080
 
 spring:
+  devtools:
+    livereload:
+      enabled: true
   datasource:
-#    url: jdbc:mysql://localhost:3306/see-realview
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:h2:mem:test;MODE=MySQL
-    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/see-realview
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:h2:mem:test;MODE=MySQL
+#    driver-class-name: org.h2.Driver
     username: root
-    password:
+    password: qwer1234
   h2:
     console:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
     open-in-view: false
+    database: mysql
+  thymeleaf:
+    cache: false
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+  mvc:
+    static-path-pattern: "/static/**"
 
 logging:
   level:

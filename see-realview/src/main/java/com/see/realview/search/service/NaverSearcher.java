@@ -4,6 +4,7 @@ import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.search.dto.request.KeywordSearchRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class NaverSearcher {
 
     private final WebClient naverWebClient;
@@ -29,6 +31,7 @@ public class NaverSearcher {
     }
 
     private Optional<NaverSearchResponse> getSearchResponse(KeywordSearchRequest request) {
+        log.debug("키워드 검색 요청 | " + request.keyword() + " | " + request.cursor());
         return naverWebClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
