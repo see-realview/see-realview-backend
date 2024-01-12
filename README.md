@@ -17,15 +17,26 @@
 - [ ] 포스트 분석 알고리즘 강화
 - [ ] 한국어 자연어 전처리
 - [ ] 포스트 북마크 기능 구현
+- [ ] 비속어 필터링 기능 구현
+- [ ] 비로그인 유저 검색 기록 구현
 
 </br>
 
 ## 설치 방법
-> Require
+> #### Require
 > - JDK 17
 > - Spring 3.1.4
-> - GOOGLE_APPLICATION_CREDENTIALS, KAKAO_SEARCH_KEY, NAVER_SEARCH_ID, NAVER_SEARCH_SECRET, ACCESS_SECRET, REFRESH_SECRET, GMAIL_SENDER, GMAIL_PASSWORD 환경변수가 등록되어 있어야 합니다.
-> - ACCESS_SECRET, REFRESH_SECRET은 256bits 이상의 길이어야 합니다.
+> #### 환경변수 목록
+> - GOOGLE_APPLICATION_CREDENTIALS
+> - KAKAO_SEARCH_KEY
+> - NAVER_SEARCH_ID
+> - NAVER_SEARCH_SECRET
+> - ACCESS_SECRET (256bits 이상)
+> - REFRESH_SECRET (256bits 이상)
+> - GMAIL_SENDER
+> - GMAIL_PASSWORD
+> - REPORT_RECEIVER_EMAIL
+> - REDIS_HOST
 
 1. clone project
 ```
@@ -67,6 +78,7 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 - 2023.12.05 : redis 캐싱 버그 수정 [#19](https://github.com/see-realview/see-realview-backend/issues/19)
 - 2024.01.10 : 타임리프를 이용한 페이지 템플릿 추가 [#26](https://github.com/see-realview/see-realview-backend/issues/26)
 - 2024.01.10 : 버그 리포트 기능 구현 [#28](https://github.com/see-realview/see-realview-backend/issues/28)
+- 2024.01.10 : MVP 구현 완료 및 배포 [#30](https://github.com/see-realview/see-realview-backend/issues/30)
 
 </br>
 
