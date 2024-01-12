@@ -62,7 +62,7 @@ public class PostAnalyzer {
 
 
         // 모델 학습 데이터 저장을 위한 임시 배열
-        List<Pair<String, String>> texts = new ArrayList<>();
+//        List<Pair<String, String>> texts = new ArrayList<>();
 
         List<ImageParseRequest> imageParseRequests = new ArrayList<>();
 
@@ -78,7 +78,7 @@ public class PostAnalyzer {
                     Elements components = elements.get();
                     String text = components.text();
                     Boolean advertisement = textAnalyzer.analyzePostText(text);
-                    texts.add(new Pair<>(request.link(), text));
+//                    texts.add(new Pair<>(request.link(), text));
 
                     if (advertisement) {
                         log.debug("텍스트에서 광고 확인됨 | " + request.link());
@@ -93,7 +93,20 @@ public class PostAnalyzer {
 
                     Element image = images.get(images.size() - 1);
                     String url = image.attr("src");
+                    if (url.equals("")) {
+                        log.debug("이미지 URL 조회 실패 | " + request.link());
+                        result.put(request.link(), false);
+                        return;
+                    }
+
                     String rawURL = url.replaceAll("\\?.*$", "");
+                    log.debug("이미지 캐싱 정보 조회 | " + request.link());
+
+                    if (parsedImageService.isWellKnownURL(rawURL)) {
+                        log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
+                        result.put(request.link(), true);
+                        return;
+                    }
 
                     Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
                     if (cachedImage.isPresent()) {
@@ -102,6 +115,8 @@ public class PostAnalyzer {
                         result.put(request.link(), cachedData.advertisement());
                         return;
                     }
+
+                    log.debug("이미지 캐싱 정보 없음 | " + request.link());
 
                     if (url.contains("static.map") || // 지도 정보 제외
                             url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
@@ -115,12 +130,16 @@ public class PostAnalyzer {
                     );
                 });
 
+        log.debug("HTML 파싱 완료. Vision API 요청 작업 시작");
         List<String> visionResponse = googleVisionAPI.call(imageParseRequests);
+
+        log.debug("Vision API 작업 완료. 파싱 결과 병합 시작");
         mergeVisionAPIResults(result, imageParseRequests, visionResponse);
 
+        log.debug("클라이언트 응답 생성");
         List<PostDTO> responses = createPostResponses(searchResponse, result);
-        savePost(texts, responses);
 
+        log.debug("응답 완료");
         Long cursor = searchResponse.start() + responses.size();
         return new AnalyzeResponse(cursor, responses);
     }
@@ -142,8 +161,10 @@ public class PostAnalyzer {
             images.add(ParsedImage.of(rawURL, advertisement));
         });
 
+        log.debug("병합 완료. 이미지 OCR 결과 저장 요청");
         parsedImageService.saveAll(images);
         parsedImageService.rebase();
+        log.debug("결과 저장 및 캐시 데이터 rebase 완료");
     }
 
     private static List<PostDTO> createPostResponses(NaverSearchResponse searchResponse, Map<String, Boolean> result) {

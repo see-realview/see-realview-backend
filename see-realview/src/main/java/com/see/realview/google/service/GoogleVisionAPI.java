@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -49,38 +50,36 @@ public class GoogleVisionAPI {
     }
 
     public List<String> call(List<ImageParseRequest> requests) {
+        log.debug("Vision API 요청 생성 시작");
         List<RequestIterator> requestIterators = requestConverter.getRequestIterators(requests, features);
         List<RequestItem> items = requestConverter.getRequestItems(requestIterators);
-
-        StringBuilder result = getVisionAPIResponse(items);
+        log.debug("Vision API 요청 생성 완료. API 호출");
+        Mono<String> resultMono = getVisionAPIResponse(items);
+        String result = resultMono.block();
+        log.debug("Vision API 응답 수신 완료");
         return parseVisionAPIResponse(result);
     }
 
-    private StringBuilder getVisionAPIResponse(List<RequestItem> items) {
+    private Mono<String> getVisionAPIResponse(List<RequestItem> items) {
         try {
             String body = objectMapper.writeValueAsString(new VisionRequest(items));
-            StringBuilder result = new StringBuilder();
-
-            googleWebClient
+            return googleWebClient
                     .post()
                     .uri(uriBuilder -> uriBuilder.queryParam("key", GCP_KEY).build())
                     .bodyValue(body)
                     .retrieve()
-                    .bodyToFlux(String.class)
-                    .toStream()
-                    .forEach(result::append);
-
-            return result;
+                    .bodyToMono(String.class);
         }
         catch (JsonProcessingException e) {
             throw new ServerException(ExceptionStatus.DATA_CONVERSION_ERROR);
         }
     }
 
-    private List<String> parseVisionAPIResponse(StringBuilder result) {
+    private List<String> parseVisionAPIResponse(String result) {
         try {
+            log.debug("Vision API 응답 결과 파싱");
             List<String> responses = new ArrayList<>();
-            JsonNode rootNode = objectMapper.readTree(result.toString());
+            JsonNode rootNode = objectMapper.readTree(result);
             JsonNode responsesNode = rootNode.path("responses");
 
             responsesNode.forEach(node -> {
@@ -93,6 +92,7 @@ public class GoogleVisionAPI {
                 else responses.add("");
             });
 
+            log.debug("Vision API 응답 결과 파싱 완료");
             return responses;
         }
         catch (JsonProcessingException e) {
