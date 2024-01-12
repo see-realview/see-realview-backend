@@ -10,7 +10,11 @@ import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,6 +30,13 @@ import java.util.stream.IntStream;
 @Component
 @Slf4j
 public class RequestConverter {
+
+    private final WebClient imageWebClient;
+
+
+    public RequestConverter(@Autowired @Qualifier("imageWebClient") WebClient imageWebClient) {
+        this.imageWebClient = imageWebClient;
+    }
 
     public List<AnalyzeRequest> createPostAnalyzeRequest(NaverSearchResponse response) {
         return response.items()
@@ -67,7 +78,7 @@ public class RequestConverter {
                         RequestItem item = new RequestItem(image, features);
                         return new RequestIterator(item, idx);
                     } catch (IOException exception) {
-                        log.debug("OCR request 변환 과정 오류"
+                        log.debug("Vision API 요청 변환 과정 오류"
                                 + "\n - 포스트 링크 : " + request.postLink()
                                 + "\n - 이미지 링크 : " + request.imageLink());
                         throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
@@ -85,17 +96,25 @@ public class RequestConverter {
                 .toList();
     }
 
-    private static String getEncodedImageFromURL(String url) throws IOException {
-        if (url == null) {
-            return null;
+    private String getEncodedImageFromURL(String url) throws IOException {
+        log.debug("이미지 다운로드 시작 | " + url);
+        Mono<byte[]> imageMono = downloadImage(url);
+        byte[] imageBytes = imageMono.block();
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            log.debug("이미지 다운로드 실패 | " + url + " | 다운로드 재시도");
+            String retry = downloadImage2(url);
+
+            if (retry.equals("")) {
+                log.debug("이미지 다운로드 재시도 실패 | " + url);
+                return "";
+            }
+
+            log.debug("이미지 다운로드 재시도 성공 | " + url);
+            return retry;
         }
 
-        String encodedURL = getEncodedURL(url);
-        URL imageURL = new URL(encodedURL);
-        HttpURLConnection connection = (HttpURLConnection) imageURL.openConnection();
-        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-
-        byte[] imageBytes = connection.getInputStream().readAllBytes();
+        log.debug("이미지 다운로드 완료 | " + url);
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
@@ -104,6 +123,35 @@ public class RequestConverter {
                 .map(s -> s.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*") ? URLEncoder.encode(s, StandardCharsets.UTF_8) : s)
                 .toArray(String[]::new);
 
-        return String.join("/", parts);
+        return String.join("/", parts).replace("w80_blur", "w966").replace("http", "https");
+    }
+
+    private Mono<byte[]> downloadImage(String url) {
+        if (url == null) {
+            return null;
+        }
+
+        String encodedURL = getEncodedURL(url);
+
+        return imageWebClient
+                .get()
+                .uri(encodedURL)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+
+    private static String downloadImage2(String url) throws IOException {
+        if (url == null) {
+            return null;
+        }
+
+        String encodedURL = getEncodedURL(url);
+        URL imageURL = new URL(encodedURL);
+        HttpURLConnection connection = (HttpURLConnection) imageURL.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+        byte[] imageBytes = connection.getInputStream().readAllBytes();
+        return Base64.getEncoder().encodeToString(imageBytes);
     }
 }
