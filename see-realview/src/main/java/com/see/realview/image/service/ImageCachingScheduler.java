@@ -16,7 +16,7 @@ public class ImageCachingScheduler {
         this.parsedImageService = parsedImageService;
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 10, zone = "Asia/Seoul")
+    @Scheduled(cron = "${api.image.cache-schedule}", zone = "Asia/Seoul")
     public void imageCachingTaskSchedule() {
         log.debug("[scheduler] 이미지 분석 캐시 데이터 rebase 시작");
         parsedImageService.rebase();
