@@ -19,7 +19,7 @@ public class ParsedImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 5000)
+    @Column(unique = true, nullable = false, length = 500)
     private String link;
 
     @Column(nullable = false)

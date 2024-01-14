@@ -7,6 +7,7 @@ import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.repository.ParsedImageRedisRepository;
 import com.see.realview.image.repository.ParsedImageRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class ParsedImageServiceImpl implements ParsedImageService {
 
     private final ParsedImageRepository parsedImageRepository;
@@ -87,16 +89,18 @@ public class ParsedImageServiceImpl implements ParsedImageService {
             return;
         }
 
-        parsedImageRepository.saveAll(images);
+        parsedImageRedisRepository.saveAll(images);
     }
 
     @Override
     @Transactional
     public void rebase() {
+        log.debug("이미지 캐싱 데이터 rebase 시작");
         List<CachedImage> cachedImages = parsedImageRedisRepository.findAll();
         List<String> urls = cachedImages.stream().map(CachedImage::link).toList();
         List<ParsedImage> parsedImages = parsedImageRepository.findAllByUrlIn(urls);
 
+        log.debug("데이터 조회 완료. redis 데이터 -> DB 이동 시작");
         cachedImages
                 .forEach(image -> {
                     ParsedImage saved = findParsedImage(parsedImages, image);
@@ -104,16 +108,18 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                 });
 
         parsedImageRepository.saveAll(parsedImages);
-        parsedImageRedisRepository.deleteAll();
 
+        log.debug("redis 데이터 저장 완료. 상위 1000개의 데이터 캐싱 시작");
         parsedImageRepository
                 .findCachingImages()
                 .forEach(image -> {
-                    ImageData imageData = new ImageData(image.getAdvertisement(), 0L);
+                    ImageData imageData = new ImageData(image.getAdvertisement(), image.getCount());
                     CachedImage cachedImage = new CachedImage(image.getLink(), imageData);
 
                     parsedImageRedisRepository.save(cachedImage);
                 });
+
+        log.debug("이미지 캐싱 데이터 rebase 완료");
     }
 
     private static ParsedImage findParsedImage(List<ParsedImage> parsedImages, CachedImage image) {
