@@ -6,17 +6,20 @@ import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
+import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.repository.ParsedImageRedisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepository {
@@ -28,6 +31,9 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     private final ObjectMapper objectMapper;
 
     private final static String IMAGE_PREFIX = "image_";
+
+    @Value("${api.image.expire}")
+    private Long CACHE_EXPIRE;
 
 
     public ParsedImageRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate,
@@ -55,7 +61,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     public List<CachedImage> findAll() {
         List<CachedImage> images = new ArrayList<>();
 
-        ScanOptions options = ScanOptions.scanOptions().match(IMAGE_PREFIX).build();
+        ScanOptions options = ScanOptions.scanOptions().match(IMAGE_PREFIX + "*").build();
         Cursor<String> cursor = redisTemplate.scan(options);
 
         while (cursor.hasNext()) {
@@ -79,6 +85,17 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
         String value = getValue(image);
 
         valueOperations.set(key, value);
+        redisTemplate.expire(key, CACHE_EXPIRE, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public void saveAll(List<ParsedImage> images) {
+        images
+                .forEach(image -> {
+                    ImageData data = new ImageData(image.getAdvertisement(), image.getCount());
+                    CachedImage cachedImage = new CachedImage(image.getLink(), data);
+                    save(cachedImage);
+                });
     }
 
     @Override

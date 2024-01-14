@@ -50,6 +50,11 @@ public class GoogleVisionAPI {
     }
 
     public List<String> call(List<ImageParseRequest> requests) {
+        if (requests.isEmpty()) {
+            log.debug("Vision API 요청 내용 없음.");
+            return List.of();
+        }
+
         log.debug("Vision API 요청 생성 시작");
         List<RequestIterator> requestIterators = requestConverter.getRequestIterators(requests, features);
         List<RequestItem> items = requestConverter.getRequestItems(requestIterators);

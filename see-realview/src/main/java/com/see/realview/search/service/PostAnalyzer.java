@@ -161,10 +161,9 @@ public class PostAnalyzer {
             images.add(ParsedImage.of(rawURL, advertisement));
         });
 
-        log.debug("병합 완료. 이미지 OCR 결과 저장 요청");
+        log.debug("병합 완료. Vision API 결과 저장 요청");
         parsedImageService.saveAll(images);
-        parsedImageService.rebase();
-        log.debug("결과 저장 및 캐시 데이터 rebase 완료");
+        log.debug("Vision API 결과 저장 완료");
     }
 
     private static List<PostDTO> createPostResponses(NaverSearchResponse searchResponse, Map<String, Boolean> result) {

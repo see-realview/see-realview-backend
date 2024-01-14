@@ -6,6 +6,7 @@ import com.see.realview.image.entity.QParsedImage;
 import com.see.realview.image.repository.ParsedImageRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -26,7 +27,8 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
 
     private final String PARSED_IMAGE_TABLE = "parsed_image_tb";
 
-    private final static int IMAGE_CACHING_SIZE = 100;
+    @Value("${api.image.cache-size}")
+    private int IMAGE_CACHING_SIZE;
 
 
     public ParsedImageRepositoryImpl(@Autowired EntityManager entityManager,
@@ -77,8 +79,8 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
 
     @Override
     public Boolean isWellKnownURL(String url) {
-        return url.contains("http://blogmall.net/campaign/blogWidget/")
-                || url.contains("https://xn--939au0g4vj8sq.net/_sp/wg.php")
-                || url.contains("https://www.revu.net/campaign/img.php");
+        return url.contains("blogmall.net/campaign/blogWidget/")
+                || url.contains("xn--939au0g4vj8sq.net/_sp/wg.php")
+                || url.contains("www.revu.net/campaign/img.php");
     }
 }

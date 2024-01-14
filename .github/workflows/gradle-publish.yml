@@ -25,6 +25,8 @@ env:
   GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
   REPORT_RECEIVER_EMAIL: ${{ secrets.REPORT_RECEIVER_EMAIL }}
   REDIS_HOST: ${{ secrets.REDIS_HOST }}
+  IMAGE_CACHE_SIZE: ${{ secrets.IMAGE_CACHE_SIZE }}
+  IMAGE_CACHE_EXPIRE: ${{ secrets.IMAGE_CACHE_EXPIRE }}
 
 jobs:
   build:

@@ -1,6 +1,7 @@
 package com.see.realview.search.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.client.BadRequestException;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.search.dto.request.KeywordSearchRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
@@ -26,6 +27,11 @@ public class NaverSearcher {
     }
 
     public NaverSearchResponse search(KeywordSearchRequest request) {
+        if (request.keyword().isEmpty()) {
+            log.debug("keyword 누락");
+            throw new BadRequestException(ExceptionStatus.KEYWORD_IS_EMPTY);
+        }
+
         return getSearchResponse(request)
                 .orElseThrow(() -> new ServerException(ExceptionStatus.NAVER_SEARCH_ERROR));
     }

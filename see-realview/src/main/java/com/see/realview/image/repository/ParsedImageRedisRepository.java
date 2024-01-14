@@ -14,5 +14,7 @@ public interface ParsedImageRedisRepository {
 
     void save(CachedImage image);
 
+    void saveAll(List<ParsedImage> images);
+
     void deleteAll();
 }

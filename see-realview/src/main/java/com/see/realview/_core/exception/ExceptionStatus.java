@@ -40,6 +40,7 @@ public enum ExceptionStatus {
 
     // 네이버 검색 에러 3000번
     NAVER_SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 3000, "네이버 검색 요청 중 에러가 발생했습니다."),
+    KEYWORD_IS_EMPTY(HttpStatus.BAD_REQUEST, 3001, "키워드가 누락되었습니다."),
 
     // 포스트 분석 에러 4000번
     POST_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 4000, "포스트 파싱 중에 에러가 발생했습니다."),
