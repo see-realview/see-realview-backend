@@ -77,8 +77,8 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
 
     @Override
     public Boolean isWellKnownURL(String url) {
-        return url.contains("http://blogmall.net/campaign/blogWidget/")
-                || url.contains("https://xn--939au0g4vj8sq.net/_sp/wg.php")
-                || url.contains("https://www.revu.net/campaign/img.php");
+        return url.contains("blogmall.net/campaign/blogWidget/")
+                || url.contains("xn--939au0g4vj8sq.net/_sp/wg.php")
+                || url.contains("www.revu.net/campaign/img.php");
     }
 }
