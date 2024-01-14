@@ -14,7 +14,9 @@ import org.springframework.test.context.TestPropertySource;
         "api.google.gmail.sender=asdf@asdf.com",
         "api.google.gmail.password=qwer1234",
         "api.report.receiver-email=qwer1234",
-        "redis.host=localhost"
+        "api.image.cache-size=1000",
+        "api.image.expire=5",
+        "redis.host=localhost",
 })
 @SpringBootTest
 class SeeRealviewApplicationTests {
