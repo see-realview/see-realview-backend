@@ -109,7 +109,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
 
         parsedImageRepository.saveAll(parsedImages);
 
-        log.debug("redis 데이터 저장 완료. 상위 1000개의 데이터 캐싱 시작");
+        log.debug("redis 데이터 저장 완료. 데이터 캐싱 시작");
         parsedImageRepository
                 .findCachingImages()
                 .forEach(image -> {

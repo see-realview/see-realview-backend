@@ -9,6 +9,7 @@ import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.repository.ParsedImageRedisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
@@ -30,6 +31,9 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     private final ObjectMapper objectMapper;
 
     private final static String IMAGE_PREFIX = "image_";
+
+    @Value("${api.image.expire}")
+    private Long CACHE_EXPIRE;
 
 
     public ParsedImageRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate,
@@ -81,7 +85,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
         String value = getValue(image);
 
         valueOperations.set(key, value);
-        redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+        redisTemplate.expire(key, CACHE_EXPIRE, TimeUnit.MINUTES);
     }
 
     @Override
