@@ -123,7 +123,7 @@ public class RequestConverter {
                 .map(s -> s.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*") ? URLEncoder.encode(s, StandardCharsets.UTF_8) : s)
                 .toArray(String[]::new);
 
-        return String.join("/", parts).replace("w80_blur", "w966").replace("http", "https");
+        return String.join("/", parts).replace("w80_blur", "w966").replace("http://", "https://");
     }
 
     private Mono<byte[]> downloadImage(String url) {

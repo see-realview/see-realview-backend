@@ -108,6 +108,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                 });
 
         parsedImageRepository.saveAll(parsedImages);
+        parsedImageRedisRepository.deleteAll();
 
         log.debug("redis 데이터 저장 완료. 데이터 캐싱 시작");
         parsedImageRepository

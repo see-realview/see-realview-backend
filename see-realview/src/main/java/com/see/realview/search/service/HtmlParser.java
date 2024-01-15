@@ -15,6 +15,9 @@ import java.util.Optional;
 @Component
 public class HtmlParser {
 
+    private final static String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+
     public Optional<Elements> parse(AnalyzeRequest request) {
         try {
             String[] splits = request.link().split("/");
@@ -22,7 +25,7 @@ public class HtmlParser {
             String postURL = "https://blog.naver.com/PostView.naver?blogId=" + request.bloggerId() + "&logNo=" + postId;
 
             Connection connection = Jsoup.connect(postURL);
-            connection.userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+            connection.userAgent(USER_AGENT);
             Document document = connection.get();
 
             Elements notSponsoredButton = document.select(".not_sponsored_button");
