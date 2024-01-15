@@ -65,10 +65,55 @@ function updateSearchResults(responseData) {
             const listItem = document.createElement('div');
             listItem.classList.add('search-result');
 
-            var link = document.createElement('a');
-            link.href = item.link;
-            link.target = '_blank';
+            const imagesContainer = document.createElement('div');
+            imagesContainer.classList.add('images-container');
+
+            // const leftArrow = document.createElement('button');
+            // leftArrow.innerHTML = '&#9665;';
+            // leftArrow.classList.add('arrow-button', 'left-arrow');
+            //
+            // const rightArrow = document.createElement('button');
+            // rightArrow.innerHTML = '&#9655;';
+            // rightArrow.classList.add('arrow-button', 'right-arrow');
+            //
+            // leftArrow.addEventListener('click', function () {
+            //     imagesContainer.scrollBy({
+            //         left: -500,
+            //         behavior: 'smooth'
+            //     });
+            // });
+            //
+            // rightArrow.addEventListener('click', function () {
+            //     imagesContainer.scrollBy({
+            //         left: 500,
+            //         behavior: 'smooth'
+            //     });
+            // });
+            //
+            // listItem.appendChild(leftArrow);
+            // listItem.appendChild(rightArrow);
+
+            if (item.images != null) {
+                item.images.forEach(function (imageUrl) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imageUrl;
+                    imgElement.setAttribute('referrerpolicy', 'no-referrer');
+                    imgElement.setAttribute("loading", "lazy");
+                    imagesContainer.appendChild(imgElement);
+                });
+
+                listItem.appendChild(imagesContainer);
+                searchContainer.appendChild(listItem);
+            }
+
+            const postContent = document.createElement('a');
+            postContent.href = item.link;
+            postContent.target = '_blank';
+            postContent.classList.add('post-content');
+
+            var link = document.createElement('div');
             link.innerHTML = item.title;
+            link.classList.add('post-title');
 
             const description = document.createElement('p');
             description.innerHTML = item.description;
@@ -81,10 +126,11 @@ function updateSearchResults(responseData) {
             dateElement.classList.add('date');
             dateElement.textContent = item.bloggerName + " | " + item.date;
 
-            listItem.appendChild(advertisementElement);
-            listItem.appendChild(link);
-            listItem.appendChild(description);
-            listItem.appendChild(dateElement);
+            postContent.appendChild(advertisementElement);
+            postContent.appendChild(link);
+            postContent.appendChild(description);
+            postContent.appendChild(dateElement);
+            listItem.appendChild(postContent);
             searchContainer.appendChild(listItem);
         });
     } else {
