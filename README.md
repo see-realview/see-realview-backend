@@ -43,6 +43,9 @@
 > - GMAIL_PASSWORD
 > - REPORT_RECEIVER_EMAIL
 > - REDIS_HOST
+> - IMAGE_CACHE_SIZE
+> - IMAGE_CACHE_EXPIRE
+> - IMAGE_CACHE_SCHEDULE
 
 1. clone project
 ```
@@ -86,6 +89,7 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 - 2024.01.10 : 버그 리포트 기능 구현 [#28](https://github.com/see-realview/see-realview-backend/issues/28)
 - 2024.01.10 : MVP 구현 완료 및 배포 [#30](https://github.com/see-realview/see-realview-backend/issues/30)
 - 2024.01.14 : 이미지 분석 결과 캐싱 오류 수정 [#32](https://github.com/see-realview/see-realview-backend/issues/32)
+- 2024.01.15 : 포스트 이미지 미리보기 구현 [#36](https://github.com/see-realview/see-realview-backend/pull/36)
 
 </br>
 
