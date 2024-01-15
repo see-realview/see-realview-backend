@@ -1,10 +1,19 @@
 package com.see.realview._core.config;
 
+import com.see.realview._core.exception.ExceptionStatus;
+import com.see.realview._core.exception.server.ServerException;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
+
+import javax.net.ssl.SSLException;
 
 @Configuration
 public class WebClientConfig {
@@ -47,11 +56,19 @@ public class WebClientConfig {
 
     @Bean(name = "imageWebClient")
     public WebClient imageWebClient() {
-        return WebClient.builder()
-                .defaultHeader("User-Agent", USER_AGENT)
-                .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024))
-                        .build())
-                .build();
+        try {
+            SslContext context = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+            HttpClient httpClient = HttpClient.create().secure(provider -> provider.sslContext(context));
+
+            return WebClient.builder()
+                    .defaultHeader("User-Agent", USER_AGENT)
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .exchangeStrategies(ExchangeStrategies.builder()
+                            .codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024))
+                            .build())
+                    .build();
+        } catch (SSLException exception) {
+            throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
+        }
     }
 }
