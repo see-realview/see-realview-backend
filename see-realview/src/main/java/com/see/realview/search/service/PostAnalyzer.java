@@ -55,6 +55,7 @@ public class PostAnalyzer {
     public AnalyzeResponse analyze(NaverSearchResponse searchResponse) {
         List<AnalyzeRequest> analyzeRequests = requestConverter.createPostAnalyzeRequest(searchResponse);
         Map<String, Boolean> result = new HashMap<>();
+        Map<String, List<String>> imageMap = new HashMap<>();
 
         analyzeRequests.forEach(analyzeRequest -> {
             result.put(analyzeRequest.link(), false);
@@ -76,18 +77,33 @@ public class PostAnalyzer {
                     }
 
                     Elements components = elements.get();
+                    Elements images = components.select("img");
                     String text = components.text();
                     Boolean advertisement = textAnalyzer.analyzePostText(text);
 //                    texts.add(new Pair<>(request.link(), text));
 
-                    if (advertisement) {
-                        log.debug("텍스트에서 광고 확인됨 | " + request.link());
-                        result.put(request.link(), true);
+                    if (images.size() == 0) {
                         return;
                     }
 
-                    Elements images = components.select("img");
-                    if (images.size() == 0) {
+                    log.debug("포스트 이미지 데이터 저장 | " + request.link());
+                    List<String> imageUrls = new ArrayList<>();
+                    images.forEach(img -> {
+                        String imageUrl = img.attr("src");
+                        if (!imageUrl.equals("") &&
+                                !imageUrl.contains("storep-phinf.pstatic.net") && //아이콘 제외
+                                !imageUrl.contains("static.map") && // 지도 정보 제외
+                                !imageUrl.contains("dthumb-phinf.pstatic.net") && // 썸네일 사진 제외
+                                !imageUrl.contains(".gif")) { // GIF 파일 제외) {
+                            imageUrls.add(imageUrl.replace("w80_blur", "w966"));
+                        }
+                    });
+                    imageMap.put(request.link(), imageUrls);
+                    log.debug("포스트 이미지 데이터 저장 완료 | " + request.link());
+
+                    if (advertisement) {
+                        log.debug("텍스트에서 광고 확인됨 | " + request.link());
+                        result.put(request.link(), true);
                         return;
                     }
 
@@ -137,7 +153,7 @@ public class PostAnalyzer {
         mergeVisionAPIResults(result, imageParseRequests, visionResponse);
 
         log.debug("클라이언트 응답 생성");
-        List<PostDTO> responses = createPostResponses(searchResponse, result);
+        List<PostDTO> responses = createPostResponses(searchResponse, result, imageMap);
 
         log.debug("응답 완료");
         Long cursor = searchResponse.start() + responses.size();
@@ -151,8 +167,8 @@ public class PostAnalyzer {
 
         imageParseRequests.forEach(request -> {
             String text = visionResponseQueue.poll();
-            log.debug(request.imageLink() + " | " + text);
             boolean advertisement = textAnalyzer.analyzeImageText(text);
+            log.debug(request.imageLink() + " | " + text + " | " + advertisement);
 
             result.put(request.postLink(), advertisement);
 
@@ -166,13 +182,14 @@ public class PostAnalyzer {
         log.debug("Vision API 결과 저장 완료");
     }
 
-    private static List<PostDTO> createPostResponses(NaverSearchResponse searchResponse, Map<String, Boolean> result) {
+    private static List<PostDTO> createPostResponses(NaverSearchResponse searchResponse, Map<String, Boolean> result, Map<String, List<String>> imageMap) {
         return searchResponse.items()
                 .stream()
                 .map(naverSearchItem -> {
                     String link = naverSearchItem.link();
                     Boolean advertisement = result.get(link);
-                    return PostDTO.of(naverSearchItem, advertisement, 0L);
+                    List<String> images = imageMap.get(link);
+                    return PostDTO.of(naverSearchItem, advertisement, 0L, images);
                 })
                 .toList();
     }

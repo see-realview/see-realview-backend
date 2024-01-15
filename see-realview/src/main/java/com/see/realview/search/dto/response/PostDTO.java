@@ -2,6 +2,8 @@ package com.see.realview.search.dto.response;
 
 import com.see.realview.search.dto.request.ImageParseRequest;
 
+import java.util.List;
+
 public record PostDTO(
         String link,
         String title,
@@ -9,10 +11,11 @@ public record PostDTO(
         String date,
         String bloggerName,
         Boolean advertisement,
-        Long recommendationCount
+        Long recommendationCount,
+        List<String> images
 ) {
 
-    public static PostDTO of(NaverSearchItem item, Boolean advertisement, Long recommendationCount) {
+    public static PostDTO of(NaverSearchItem item, Boolean advertisement, Long recommendationCount, List<String> images) {
         String date = item.postdate();
         String formattedDate = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
 
@@ -23,7 +26,8 @@ public record PostDTO(
                 formattedDate,
                 item.bloggername(),
                 advertisement,
-                0L
+                0L,
+                images
         );
     }
 }
