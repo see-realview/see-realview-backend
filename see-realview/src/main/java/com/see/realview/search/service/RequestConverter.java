@@ -2,12 +2,12 @@ package com.see.realview.search.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
-import com.see.realview.search.dto.request.AnalyzeRequest;
-import com.see.realview.search.dto.request.ImageParseRequest;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestImage;
 import com.see.realview.google.dto.RequestItem;
 import com.see.realview.google.dto.RequestIterator;
+import com.see.realview.search.dto.request.AnalyzeRequest;
+import com.see.realview.search.dto.request.ImageParseRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -102,16 +101,8 @@ public class RequestConverter {
         byte[] imageBytes = imageMono.block();
 
         if (imageBytes == null || imageBytes.length == 0) {
-            log.debug("이미지 다운로드 실패 | " + url + " | 다운로드 재시도");
-            String retry = downloadImage2(url);
-
-            if (retry.equals("")) {
-                log.debug("이미지 다운로드 재시도 실패 | " + url);
-                return "";
-            }
-
-            log.debug("이미지 다운로드 재시도 성공 | " + url);
-            return retry;
+            log.debug("이미지 다운로드 실패 | " + url);
+            return "";
         }
 
         log.debug("이미지 다운로드 완료 | " + url);
@@ -138,20 +129,5 @@ public class RequestConverter {
                 .uri(encodedURL)
                 .retrieve()
                 .bodyToMono(byte[].class);
-    }
-
-    private static String downloadImage2(String url) throws IOException {
-        if (url == null) {
-            return null;
-        }
-
-        String encodedURL = getEncodedURL(url);
-        URL imageURL = new URL(encodedURL);
-        HttpURLConnection connection = (HttpURLConnection) imageURL.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-
-        byte[] imageBytes = connection.getInputStream().readAllBytes();
-        return Base64.getEncoder().encodeToString(imageBytes);
     }
 }
