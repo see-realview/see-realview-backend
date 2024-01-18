@@ -10,7 +10,6 @@ import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.search.dto.response.NaverSearchResponse;
-import com.see.realview.search.repository.SearchItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -34,21 +33,17 @@ public class PostAnalyzer {
 
     private final ParsedImageService parsedImageService;
 
-    private final SearchItemRepository searchItemRepository;
-
 
     public PostAnalyzer(@Autowired RequestConverter requestConverter,
                         @Autowired HtmlParser htmlParser,
                         @Autowired TextAnalyzer textAnalyzer,
                         @Autowired GoogleVisionAPI googleVisionAPI,
-                        @Autowired ParsedImageService parsedImageService,
-                        @Autowired SearchItemRepository searchItemRepository) {
+                        @Autowired ParsedImageService parsedImageService) {
         this.requestConverter = requestConverter;
         this.htmlParser = htmlParser;
         this.textAnalyzer = textAnalyzer;
         this.googleVisionAPI = googleVisionAPI;
         this.parsedImageService = parsedImageService;
-        this.searchItemRepository = searchItemRepository;
     }
 
     public AnalyzeResponse analyze(NaverSearchResponse searchResponse) {
@@ -84,13 +79,9 @@ public class PostAnalyzer {
                     log.debug("포스트 이미지 데이터 저장 | " + request.link());
                     List<String> imageUrls = new ArrayList<>();
                     images.forEach(img -> {
-                        String imageUrl = img.attr("src");
-                        if (!imageUrl.equals("") &&
-                                !imageUrl.contains("storep-phinf.pstatic.net") && //아이콘 제외
-                                !imageUrl.contains("static.map") && // 지도 정보 제외
-                                !imageUrl.contains("dthumb-phinf.pstatic.net") && // 썸네일 사진 제외
-                                !imageUrl.contains(".gif")) { // GIF 파일 제외) {
-                            imageUrls.add(imageUrl.replace("w80_blur", "w966"));
+                        String imageUrl = img.attr("src").replace("w80_blur", "w966");
+                        if (isValidPostImage(imageUrl)) {
+                            imageUrls.add(imageUrl);
                             if (parsedImageService.isWellKnownURL(imageUrl)) {
                                 result.put(request.link(), false);
                                 advertisement.set(true);
@@ -133,9 +124,7 @@ public class PostAnalyzer {
 
                     log.debug("이미지 캐싱 정보 없음 | " + request.link());
 
-                    if (url.contains("static.map") || // 지도 정보 제외
-                            url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
-                            url.contains(".gif")) { // GIF 파일 제외
+                    if (!isValidAnalyzableImage(url)) {
                         result.put(request.link(), false);
                         return;
                     }
@@ -191,5 +180,17 @@ public class PostAnalyzer {
                     return PostDTO.of(naverSearchItem, advertisement, 0L, images);
                 })
                 .toList();
+    }
+
+    private Boolean isValidPostImage(String url) {
+        return !url.equals("")
+                && !url.contains("storep-phinf.pstatic.net")
+                && isValidAnalyzableImage(url);
+    }
+
+    private Boolean isValidAnalyzableImage(String url) {
+        return !url.contains("static.map")
+                && !url.contains("dthumb-phinf.pstatic.net")
+                && !url.contains(".gif");
     }
 }
