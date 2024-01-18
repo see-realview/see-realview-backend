@@ -8,6 +8,7 @@ import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.repository.ParsedImageRedisRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Repository
+@Slf4j
 public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepository {
     
     private final RedisTemplate redisTemplate;
@@ -69,6 +71,11 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
             String data = valueOperations.get(key);
 
             String url = key.replace(IMAGE_PREFIX, "");
+            if (url.equals("")) {
+                log.debug("Redis 데이터 empty 오류 발생 | " + key);
+                continue;
+            }
+
             ImageData imageData = getImageData(data);
 
             images.add(
