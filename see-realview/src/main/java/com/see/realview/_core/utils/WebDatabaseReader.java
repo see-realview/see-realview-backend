@@ -20,7 +20,7 @@ public class WebDatabaseReader {
         this.databaseWebClient = databaseWebClient;
     }
 
-    public List<String> read(String url, String identifier) {
+    public byte[] read(String url) {
         log.debug("웹 데이터베이스 다운로드 시작 | " + url);
         Mono<byte[]> readBytes = databaseWebClient
                 .get()
@@ -29,13 +29,7 @@ public class WebDatabaseReader {
                 .bodyToMono(byte[].class);
 
         byte[] dataBytes = readBytes.block();
-        if (dataBytes == null) {
-            log.debug("웹 데이터베이스 다운로드 실패 | " + url);
-            return List.of();
-        }
-
         log.debug("웹 데이터베이스 다운로드 완료 | " + url);
-        String data = Arrays.toString(dataBytes);
-        return List.of(data.split(identifier));
+        return dataBytes;
     }
 }
