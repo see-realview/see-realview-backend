@@ -24,7 +24,7 @@ window.addEventListener('scroll', function () {
     const scrollTop = document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
 
-    if (scrollHeight - scrollTop - 1000 <= clientHeight && !loading) {
+    if (scrollHeight - scrollTop - 2000 <= clientHeight && !loading) {
         const keyword = document.getElementById('search-input').value;
         const cursor = localStorage.getItem("cursor");
 
