@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -128,7 +129,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
             log.debug("웹 데이터베이스 다운로드 에러 | " + WEB_DATABASE_URL);
         }
 
-        String data = Arrays.toString(downloadData);
+        String data = new String(downloadData, StandardCharsets.UTF_8);
         this.WELL_KNOWN_URLS = List.of(data.split("\n"));
 
         log.debug("WELL-KNOWN URLS 데이터 " + this.WELL_KNOWN_URLS.size() + "개 리프레시 완료");
