@@ -1,6 +1,5 @@
 package com.see.realview.search.service;
 
-import com.mysema.commons.lang.Pair;
 import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.search.dto.request.AnalyzeRequest;
 import com.see.realview.search.dto.request.ImageParseRequest;
@@ -11,7 +10,6 @@ import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.service.ParsedImageService;
 import com.see.realview.search.dto.response.NaverSearchResponse;
-import com.see.realview.search.entity.SearchItem;
 import com.see.realview.search.repository.SearchItemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Slf4j
@@ -62,9 +61,6 @@ public class PostAnalyzer {
         });
 
 
-        // 모델 학습 데이터 저장을 위한 임시 배열
-//        List<Pair<String, String>> texts = new ArrayList<>();
-
         List<ImageParseRequest> imageParseRequests = new ArrayList<>();
 
         analyzeRequests
@@ -79,8 +75,7 @@ public class PostAnalyzer {
                     Elements components = elements.get();
                     Elements images = components.select("img");
                     String text = components.text();
-                    Boolean advertisement = textAnalyzer.analyzePostText(text);
-//                    texts.add(new Pair<>(request.link(), text));
+                    AtomicReference<Boolean> advertisement = new AtomicReference<>(textAnalyzer.analyzePostText(text));
 
                     if (images.size() == 0) {
                         return;
@@ -96,12 +91,16 @@ public class PostAnalyzer {
                                 !imageUrl.contains("dthumb-phinf.pstatic.net") && // 썸네일 사진 제외
                                 !imageUrl.contains(".gif")) { // GIF 파일 제외) {
                             imageUrls.add(imageUrl.replace("w80_blur", "w966"));
+                            if (parsedImageService.isWellKnownURL(imageUrl)) {
+                                result.put(request.link(), false);
+                                advertisement.set(true);
+                            }
                         }
                     });
                     imageMap.put(request.link(), imageUrls);
                     log.debug("포스트 이미지 데이터 저장 완료 | " + request.link());
 
-                    if (advertisement) {
+                    if (advertisement.get()) {
                         log.debug("텍스트에서 광고 확인됨 | " + request.link());
                         result.put(request.link(), true);
                         return;
@@ -192,21 +191,5 @@ public class PostAnalyzer {
                     return PostDTO.of(naverSearchItem, advertisement, 0L, images);
                 })
                 .toList();
-    }
-
-    private void savePost(List<Pair<String, String>> texts, List<PostDTO> responses) {
-        List<SearchItem> searchItems = responses
-                .stream()
-                .map(postDTO -> {
-                    String text = texts
-                            .stream()
-                            .filter(iter -> iter.getFirst().equals(postDTO.link()))
-                            .findFirst().orElseThrow()
-                            .getSecond();
-
-                    return SearchItem.of(postDTO, text);
-                })
-                .toList();
-        searchItemRepository.saveAll(searchItems);
     }
 }
