@@ -2,6 +2,7 @@ package com.see.realview.image.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.client.NotFoundException;
+import com.see.realview._core.utils.WebDatabaseReader;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
 import com.see.realview.image.entity.ParsedImage;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +26,19 @@ public class ParsedImageServiceImpl implements ParsedImageService {
 
     private final ParsedImageRedisRepository parsedImageRedisRepository;
 
+    private final WebDatabaseReader webDatabaseReader;
+
+    private final static String WEB_DATABASE_URL = "https://raw.githubusercontent.com/seokwns/see-realview-backend/develop/web-db/well-known-urls.txt";
+
+    private List<String> WELL_KNOWN_URLS = new ArrayList<>();
+
 
     public ParsedImageServiceImpl(@Autowired ParsedImageRepository parsedImageRepository,
-                                  @Autowired ParsedImageRedisRepository parsedImageRedisRepository) {
+                                  @Autowired ParsedImageRedisRepository parsedImageRedisRepository,
+                                  @Autowired WebDatabaseReader webDatabaseReader) {
         this.parsedImageRepository = parsedImageRepository;
         this.parsedImageRedisRepository = parsedImageRedisRepository;
+        this.webDatabaseReader = webDatabaseReader;
     }
 
     @Override
@@ -42,38 +53,6 @@ public class ParsedImageServiceImpl implements ParsedImageService {
         parsedImageRedisRepository.save(newImage);
 
         return Optional.of(newImage);
-    }
-
-    @Override
-    public Boolean isWellKnownURL(String url) {
-        return parsedImageRepository.isWellKnownURL(url);
-    }
-
-    @Override
-    public Optional<ParsedImage> findByURL(String link) {
-        Optional<CachedImage> cachedImage = parsedImageRedisRepository.findByURL(link);
-
-        if (cachedImage.isEmpty()) {
-            return Optional.empty();
-        }
-
-        CachedImage image = cachedImage.get();
-        ParsedImage parsedImage = ParsedImage.builder()
-                .link(link)
-                .advertisement(image.data().advertisement())
-                .count(image.data().count())
-                .build();
-
-        return Optional.of(parsedImage);
-    }
-
-    @Override
-    public void increment(String url) {
-        CachedImage image = parsedImageRedisRepository.findByURL(url)
-                .orElseThrow(() -> new NotFoundException(ExceptionStatus.CACHED_IMAGE_NOT_FOUND));
-
-        CachedImage newImage = image.increment();
-        parsedImageRedisRepository.save(newImage);
     }
 
     @Override
@@ -97,20 +76,22 @@ public class ParsedImageServiceImpl implements ParsedImageService {
     public void rebase() {
         log.debug("이미지 캐싱 데이터 rebase 시작");
         List<CachedImage> cachedImages = parsedImageRedisRepository.findAll();
+        log.debug("Redis 데이터 조회 완료. 데이터베이스 조회 시작");
         List<String> urls = cachedImages.stream().map(CachedImage::link).toList();
         List<ParsedImage> parsedImages = parsedImageRepository.findAllByUrlIn(urls);
 
-        log.debug("데이터 조회 완료. redis 데이터 -> DB 이동 시작");
+        log.debug("데이터베이스 조회 완료. Redis -> DB 이동 시작");
         cachedImages
                 .forEach(image -> {
                     ParsedImage saved = findParsedImage(parsedImages, image);
                     saved.updateCount(image.data().count());
                 });
-
         parsedImageRepository.saveAll(parsedImages);
+
+        log.debug("Redis 데이터 이동 완료. Redis 데이터 삭제 시작.");
         parsedImageRedisRepository.deleteAll();
 
-        log.debug("redis 데이터 저장 완료. 데이터 캐싱 시작");
+        log.debug("Redis 데이터 삭제 완료. DB -> Redis 이동 시작");
         parsedImageRepository
                 .findCachingImages()
                 .forEach(image -> {
@@ -120,7 +101,7 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                     parsedImageRedisRepository.save(cachedImage);
                 });
 
-        log.debug("이미지 캐싱 데이터 rebase 완료");
+        log.debug("DB 데이터 이동 완료. rebase 완료");
     }
 
     private static ParsedImage findParsedImage(List<ParsedImage> parsedImages, CachedImage image) {
@@ -137,5 +118,30 @@ public class ParsedImageServiceImpl implements ParsedImageService {
                     parsedImages.add(newImage);
                     return newImage;
                 });
+    }
+
+    @Override
+    public void rebaseWebDatabase() {
+        log.debug("WELL-KNOWN URLS 데이터 리프레시 시작");
+        byte[] downloadData = webDatabaseReader.read(WEB_DATABASE_URL);
+        if (downloadData == null) {
+            log.debug("웹 데이터베이스 다운로드 에러 | " + WEB_DATABASE_URL);
+        }
+
+        String data = Arrays.toString(downloadData);
+        this.WELL_KNOWN_URLS = List.of(data.split("\n"));
+
+        log.debug("WELL-KNOWN URLS 데이터 " + this.WELL_KNOWN_URLS.size() + "개 리프레시 완료");
+    }
+
+    @Override
+    public Boolean isWellKnownURL(String url) {
+        for (String data : this.WELL_KNOWN_URLS) {
+            if (url.contains(data)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

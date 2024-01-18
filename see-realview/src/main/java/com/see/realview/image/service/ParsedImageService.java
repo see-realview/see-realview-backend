@@ -10,15 +10,13 @@ public interface ParsedImageService {
 
     Optional<CachedImage> isAlreadyParsedImage(String url);
 
-    Boolean isWellKnownURL(String url);
-
-    Optional<ParsedImage> findByURL(String url);
-
-    void increment(String url);
-
     void save(String url, Boolean advertisement);
 
     void saveAll(List<ParsedImage> images);
 
     void rebase();
+
+    void rebaseWebDatabase();
+
+    Boolean isWellKnownURL(String url);
 }
