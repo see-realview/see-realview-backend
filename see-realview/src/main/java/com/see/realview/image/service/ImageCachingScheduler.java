@@ -22,4 +22,11 @@ public class ImageCachingScheduler {
         parsedImageService.rebase();
         log.debug("[scheduler] 이미지 분석 캐시 데이터 rebase 완료");
     }
+
+    @Scheduled(cron = "${api.image.well-known-cache-schedule}", zone = "Asia/Seoul")
+    public void wellKnownImageCachingTaskSchedule() {
+        log.debug("[scheduler] well-known urls 웹 데이터베이스 rebase 시작");
+        parsedImageService.rebaseWebDatabase();
+        log.debug("[scheduler] well-known urls 웹 데이터베이스 rebase 완료");
+    }
 }
