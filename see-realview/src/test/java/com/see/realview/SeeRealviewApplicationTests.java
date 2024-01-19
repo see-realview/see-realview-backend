@@ -17,9 +17,10 @@ import org.springframework.test.context.TestPropertySource;
         "api.image.cache-size=1000",
         "api.image.cache-schedule=0 0/10 * * * *",
         "api.image.expire=5",
+        "api.image.well-known-cache-schedule=0 0 0 * * *",
         "redis.host=localhost"
 })
-@SpringBootTest
+@SpringBootTest(classes = SeeRealviewApplicationTests.class)
 class SeeRealviewApplicationTests {
 
     @Test
