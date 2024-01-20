@@ -1,9 +1,9 @@
 package com.see.realview.image.repository.impl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.entity.QParsedImage;
-import com.see.realview.image.repository.ParsedImageRepository;
+import com.see.realview.image.entity.Image;
+import com.see.realview.image.entity.QImage;
+import com.see.realview.image.repository.ImageRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,32 +15,32 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class ParsedImageRepositoryImpl implements ParsedImageRepository {
+public class ImageRepositoryImpl implements ImageRepository {
 
     private final EntityManager entityManager;
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    private final static QParsedImage TABLE = QParsedImage.parsedImage;
+    private final static QImage TABLE = QImage.image;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private final String PARSED_IMAGE_TABLE = "parsed_image_tb";
+    private final String IMAGE_TABLE = "image_tb";
 
     @Value("${api.image.cache-size}")
     private int IMAGE_CACHING_SIZE;
 
 
-    public ParsedImageRepositoryImpl(@Autowired EntityManager entityManager,
-                                     @Autowired JPAQueryFactory jpaQueryFactory,
-                                     @Autowired NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public ImageRepositoryImpl(@Autowired EntityManager entityManager,
+                               @Autowired JPAQueryFactory jpaQueryFactory,
+                               @Autowired NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.entityManager = entityManager;
         this.jpaQueryFactory = jpaQueryFactory;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
-    public List<ParsedImage> findAllByUrlIn(List<String> urls) {
+    public List<Image> findAllByUrlIn(List<String> urls) {
         return jpaQueryFactory
                 .selectFrom(TABLE)
                 .where(TABLE.link.in(urls))
@@ -48,7 +48,7 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
     }
 
     @Override
-    public List<ParsedImage> findCachingImages() {
+    public List<Image> findCachingImages() {
         return jpaQueryFactory
                 .selectFrom(TABLE)
                 .orderBy(TABLE.count.desc())
@@ -57,17 +57,17 @@ public class ParsedImageRepositoryImpl implements ParsedImageRepository {
     }
 
     @Override
-    public void save(ParsedImage image) {
+    public void save(Image image) {
         entityManager.persist(image);
     }
 
     @Override
-    public void saveAll(List<ParsedImage> images) {
+    public void saveAll(List<Image> images) {
         String sql = String.format("""
                 INSERT INTO `%s` (link, advertisement, count)
                 VALUES (:link, :advertisement, :count)
                 ON DUPLICATE KEY UPDATE link = :link, advertisement = :advertisement, count = count + :count
-                """, PARSED_IMAGE_TABLE);
+                """, IMAGE_TABLE);
 
         SqlParameterSource[] parameterSources = images
                 .stream()

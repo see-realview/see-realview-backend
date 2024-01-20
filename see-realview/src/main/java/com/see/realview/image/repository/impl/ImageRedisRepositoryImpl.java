@@ -6,13 +6,11 @@ import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.repository.ParsedImageRedisRepository;
+import com.see.realview.image.entity.Image;
+import com.see.realview.image.repository.ImageRedisRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -24,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 @Repository
 @Slf4j
-public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepository {
+public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     
     private final RedisTemplate redisTemplate;
     
@@ -38,8 +36,8 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     private Long CACHE_EXPIRE;
 
 
-    public ParsedImageRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate,
-                                          @Autowired ObjectMapper objectMapper) {
+    public ImageRedisRepositoryImpl(@Autowired RedisTemplate<String, String> redisTemplate,
+                                    @Autowired ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         this.valueOperations = redisTemplate.opsForValue();
         this.objectMapper = objectMapper;
@@ -96,7 +94,7 @@ public class ParsedImageRedisRepositoryImpl implements ParsedImageRedisRepositor
     }
 
     @Override
-    public void saveAll(List<ParsedImage> images) {
+    public void saveAll(List<Image> images) {
         images
                 .forEach(image -> {
                     ImageData data = new ImageData(image.getAdvertisement(), image.getCount());

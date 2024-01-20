@@ -3,8 +3,8 @@ package com.see.realview.search.service;
 import com.see.realview.google.service.GoogleVisionAPI;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.service.ParsedImageService;
+import com.see.realview.image.entity.Image;
+import com.see.realview.image.service.ImageService;
 import com.see.realview.search.dto.request.AnalyzeRequest;
 import com.see.realview.search.dto.request.ImageParseRequest;
 import com.see.realview.search.dto.response.AnalyzeResponse;
@@ -30,19 +30,19 @@ public class PostAnalyzer {
 
     private final GoogleVisionAPI googleVisionAPI;
 
-    private final ParsedImageService parsedImageService;
+    private final ImageService imageService;
 
 
     public PostAnalyzer(@Autowired RequestConverter requestConverter,
                         @Autowired HtmlParser htmlParser,
                         @Autowired TextAnalyzer textAnalyzer,
                         @Autowired GoogleVisionAPI googleVisionAPI,
-                        @Autowired ParsedImageService parsedImageService) {
+                        @Autowired ImageService imageService) {
         this.requestConverter = requestConverter;
         this.htmlParser = htmlParser;
         this.textAnalyzer = textAnalyzer;
         this.googleVisionAPI = googleVisionAPI;
-        this.parsedImageService = parsedImageService;
+        this.imageService = imageService;
     }
 
     public AnalyzeResponse analyze(NaverSearchResponse searchResponse) {
@@ -81,7 +81,7 @@ public class PostAnalyzer {
                     log.debug("포스트 이미지 데이터 저장 완료 | " + request.link());
 
                     log.debug("포스트 이미지들에 대한 well-known 링크 검사 시작 | " + request.link());
-                    advertisement = imageUrls.stream().anyMatch(parsedImageService::isWellKnownURL);
+                    advertisement = imageUrls.stream().anyMatch(imageService::isWellKnownURL);
                     log.debug("포스트 이미지들에 대한 well-known 링크 검사 종료 | " + request.link() + " | " + advertisement);
 
                     if (advertisement) {
@@ -108,7 +108,7 @@ public class PostAnalyzer {
                     String rawURL = url.replaceAll("\\?.*$", "");
                     log.debug("이미지 캐싱 정보 조회 | " + request.link());
 
-                    Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
+                    Optional<CachedImage> cachedImage = imageService.isAlreadyParsedImage(rawURL);
                     if (cachedImage.isPresent()) {
                         ImageData cachedData = cachedImage.get().data();
                         log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
@@ -157,7 +157,7 @@ public class PostAnalyzer {
 
     private void mergeVisionAPIResults(Map<String, Boolean> result, List<ImageParseRequest> imageParseRequests, List<String> visionResponse) {
         Queue<String> visionResponseQueue = new LinkedList<>(visionResponse);
-        List<ParsedImage> images = new ArrayList<>();
+        List<Image> images = new ArrayList<>();
 
         imageParseRequests.forEach(request -> {
             String text = visionResponseQueue.poll();
@@ -168,11 +168,11 @@ public class PostAnalyzer {
 
             String url = request.imageLink();
             String rawURL = url.replaceAll("\\?.*$", "");
-            images.add(ParsedImage.of(rawURL, advertisement));
+            images.add(Image.of(rawURL, advertisement));
         });
 
         log.debug("병합 완료. Vision API 결과 저장 요청");
-        parsedImageService.saveAll(images);
+        imageService.saveAll(images);
         log.debug("Vision API 결과 저장 완료");
     }
 
