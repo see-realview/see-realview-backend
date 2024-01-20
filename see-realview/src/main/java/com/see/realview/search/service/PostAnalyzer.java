@@ -1,15 +1,15 @@
 package com.see.realview.search.service;
 
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.search.dto.request.AnalyzeRequest;
-import com.see.realview.search.dto.request.ImageParseRequest;
-import com.see.realview.search.dto.response.AnalyzeResponse;
-import com.see.realview.search.dto.response.PostDTO;
 import com.see.realview.google.service.GoogleVisionAPI;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
+import com.see.realview.image.entity.ParsedImage;
 import com.see.realview.image.service.ParsedImageService;
+import com.see.realview.search.dto.request.AnalyzeRequest;
+import com.see.realview.search.dto.request.ImageParseRequest;
+import com.see.realview.search.dto.response.AnalyzeResponse;
 import com.see.realview.search.dto.response.NaverSearchResponse;
+import com.see.realview.search.dto.response.PostDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @Slf4j
@@ -70,28 +69,29 @@ public class PostAnalyzer {
                     Elements components = elements.get();
                     Elements images = components.select("img");
                     String text = components.text();
-                    AtomicReference<Boolean> advertisement = new AtomicReference<>(textAnalyzer.analyzePostText(text));
+                    Boolean advertisement;
 
                     if (images.size() == 0) {
                         return;
                     }
 
                     log.debug("포스트 이미지 데이터 저장 | " + request.link());
-                    List<String> imageUrls = new ArrayList<>();
-                    images.forEach(img -> {
-                        String imageUrl = img.attr("src").replace("w80_blur", "w966");
-                        if (isValidPostImage(imageUrl)) {
-                            imageUrls.add(imageUrl);
-                            if (parsedImageService.isWellKnownURL(imageUrl)) {
-                                result.put(request.link(), false);
-                                advertisement.set(true);
-                            }
-                        }
-                    });
+                    List<String> imageUrls = getPostImageData(images);
                     imageMap.put(request.link(), imageUrls);
                     log.debug("포스트 이미지 데이터 저장 완료 | " + request.link());
 
-                    if (advertisement.get()) {
+                    log.debug("포스트 이미지들에 대한 well-known 링크 검사 시작 | " + request.link());
+                    advertisement = imageUrls.stream().anyMatch(parsedImageService::isWellKnownURL);
+                    log.debug("포스트 이미지들에 대한 well-known 링크 검사 종료 | " + request.link() + " | " + advertisement);
+
+                    if (advertisement) {
+                        log.debug("이미지에서 광고 확인됨 | " + request.link());
+                        result.put(request.link(), true);
+                        return;
+                    }
+
+                    advertisement = textAnalyzer.analyzePostText(text);
+                    if (advertisement) {
                         log.debug("텍스트에서 광고 확인됨 | " + request.link());
                         result.put(request.link(), true);
                         return;
@@ -108,12 +108,6 @@ public class PostAnalyzer {
                     String rawURL = url.replaceAll("\\?.*$", "");
                     log.debug("이미지 캐싱 정보 조회 | " + request.link());
 
-                    if (parsedImageService.isWellKnownURL(rawURL)) {
-                        log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
-                        result.put(request.link(), true);
-                        return;
-                    }
-
                     Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
                     if (cachedImage.isPresent()) {
                         ImageData cachedData = cachedImage.get().data();
@@ -126,6 +120,7 @@ public class PostAnalyzer {
 
                     if (!isValidAnalyzableImage(url)) {
                         result.put(request.link(), false);
+                        log.debug("이미지가 분석 가능하지 않음 | " + request.link() + " | " + url);
                         return;
                     }
 
@@ -148,6 +143,17 @@ public class PostAnalyzer {
         return new AnalyzeResponse(cursor, responses);
     }
 
+
+    private List<String> getPostImageData(Elements images) {
+        List<String> imageUrls = new ArrayList<>();
+        images.forEach(img -> {
+            String imageUrl = img.attr("src").replace("w80_blur", "w966");
+            if (isValidPostImage(imageUrl)) {
+                imageUrls.add(imageUrl);
+            }
+        });
+        return imageUrls;
+    }
 
     private void mergeVisionAPIResults(Map<String, Boolean> result, List<ImageParseRequest> imageParseRequests, List<String> visionResponse) {
         Queue<String> visionResponseQueue = new LinkedList<>(visionResponse);
