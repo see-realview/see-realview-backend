@@ -34,8 +34,10 @@ public class SearchController {
         log.debug("+---------------------------------------------+");
         KeywordSearchRequest request = new KeywordSearchRequest(keyword, cursor);
         NaverSearchResponse searchResponse = naverSearcher.search(request);
+
         log.debug("네이버 검색 완료, 포스트 분석 시작 | " + keyword + " | " + cursor);
         AnalyzeResponse responses = postAnalyzer.analyze(searchResponse);
+
         return ResponseEntity.ok().body(Response.success(responses));
     }
 }

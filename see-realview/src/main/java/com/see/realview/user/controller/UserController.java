@@ -1,7 +1,6 @@
 package com.see.realview.user.controller;
 
 import com.see.realview._core.response.Response;
-import com.see.realview._core.response.ResponseData;
 import com.see.realview._core.security.JwtProvider;
 import com.see.realview.token.entity.Token;
 import com.see.realview.token.entity.constants.Header;
