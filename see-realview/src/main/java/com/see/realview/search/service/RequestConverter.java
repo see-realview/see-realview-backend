@@ -2,6 +2,7 @@ package com.see.realview.search.service;
 
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
+import com.see.realview._core.utils.ImageDownloader;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestImage;
 import com.see.realview.google.dto.RequestItem;
@@ -11,15 +12,12 @@ import com.see.realview.search.dto.request.ImageParseRequest;
 import com.see.realview.search.dto.response.NaverSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -28,11 +26,11 @@ import java.util.stream.IntStream;
 @Slf4j
 public class RequestConverter {
 
-    private final WebClient imageWebClient;
+    private final ImageDownloader imageDownloader;
 
 
-    public RequestConverter(@Autowired @Qualifier("imageWebClient") WebClient imageWebClient) {
-        this.imageWebClient = imageWebClient;
+    public RequestConverter(@Autowired ImageDownloader imageDownloader) {
+        this.imageDownloader = imageDownloader;
     }
 
     public List<AnalyzeRequest> createPostAnalyzeRequest(NaverSearchResponse response) {
@@ -71,7 +69,7 @@ public class RequestConverter {
                 .mapToObj(idx -> {
                     ImageParseRequest request = requests.get(idx);
                     try {
-                        RequestImage image = new RequestImage(getEncodedImageFromURL(request.imageLink()));
+                        RequestImage image = new RequestImage(imageDownloader.getEncodedImageFromURL(request.imageLink()));
                         RequestItem item = new RequestItem(image, features);
                         return new RequestIterator(item, idx);
                     } catch (IOException exception) {
@@ -91,41 +89,5 @@ public class RequestConverter {
                 .map(RequestIterator::item)
                 .filter(item -> item.image().content() != null && !item.image().content().equals(""))
                 .toList();
-    }
-
-    private String getEncodedImageFromURL(String url) throws IOException {
-        log.debug("이미지 다운로드 시작 | " + url);
-        Mono<byte[]> imageMono = downloadImage(url);
-        byte[] imageBytes = imageMono.block();
-
-        if (imageBytes == null || imageBytes.length == 0) {
-            log.debug("이미지 다운로드 실패 | " + url);
-            return "";
-        }
-
-        log.debug("이미지 다운로드 완료 | " + url);
-        return Base64.getEncoder().encodeToString(imageBytes);
-    }
-
-    private static String getEncodedURL(String url) {
-        String[] parts = Arrays.stream(url.split("/"))
-                .map(s -> s.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*") ? URLEncoder.encode(s, StandardCharsets.UTF_8) : s)
-                .toArray(String[]::new);
-
-        return String.join("/", parts).replace("w80_blur", "w966").replace("http://", "https://");
-    }
-
-    private Mono<byte[]> downloadImage(String url) {
-        if (url == null) {
-            return null;
-        }
-
-        String encodedURL = getEncodedURL(url);
-
-        return imageWebClient
-                .get()
-                .uri(encodedURL)
-                .retrieve()
-                .bodyToMono(byte[].class);
     }
 }
