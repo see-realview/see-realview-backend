@@ -24,7 +24,7 @@ public class ImageDownloader {
         this.imageWebClient = imageWebClient;
     }
 
-    public String getEncodedImageFromURL(String url) throws IOException {
+    public String getEncodedImageFromURL(String url) {
         log.debug("이미지 다운로드 시작 | " + url);
         Mono<byte[]> imageMono = downloadImage(url);
         byte[] imageBytes = imageMono.block();

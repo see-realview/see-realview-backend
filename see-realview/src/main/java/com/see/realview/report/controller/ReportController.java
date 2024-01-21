@@ -4,12 +4,15 @@ import com.see.realview._core.response.Response;
 import com.see.realview.report.dto.request.BugReportRequest;
 import com.see.realview.report.service.ReportService;
 import com.see.realview.report.service.constant.ReportType;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.UnsupportedEncodingException;
 
 @RestController
 @RequestMapping("/api/report")
@@ -23,7 +26,7 @@ public class ReportController {
     }
 
     @PostMapping("/bug")
-    public ResponseEntity<?> sendBugReport(@RequestBody BugReportRequest request) {
+    public ResponseEntity<?> sendBugReport(@RequestBody BugReportRequest request) throws MessagingException, UnsupportedEncodingException {
         reportService.send(ReportType.BUG, request);
         return ResponseEntity.ok().body(Response.success(null));
     }

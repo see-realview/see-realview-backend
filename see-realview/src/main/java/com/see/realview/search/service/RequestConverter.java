@@ -68,16 +68,9 @@ public class RequestConverter {
                 .parallel()
                 .mapToObj(idx -> {
                     ImageParseRequest request = requests.get(idx);
-                    try {
-                        RequestImage image = new RequestImage(imageDownloader.getEncodedImageFromURL(request.imageLink()));
-                        RequestItem item = new RequestItem(image, features);
-                        return new RequestIterator(item, idx);
-                    } catch (IOException exception) {
-                        log.debug("Vision API 요청 변환 과정 오류"
-                                + "\n - 포스트 링크 : " + request.postLink()
-                                + "\n - 이미지 링크 : " + request.imageLink());
-                        throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
-                    }
+                    RequestImage image = new RequestImage(imageDownloader.getEncodedImageFromURL(request.imageLink()));
+                    RequestItem item = new RequestItem(image, features);
+                    return new RequestIterator(item, idx);
                 })
                 .toList();
     }

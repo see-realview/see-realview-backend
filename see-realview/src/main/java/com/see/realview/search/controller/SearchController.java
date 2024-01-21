@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping("/api/search")
 @Slf4j
@@ -28,7 +31,7 @@ public class SearchController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> searchKeyword(@RequestParam String keyword, @RequestParam(defaultValue = "1") Long cursor) {
+    public ResponseEntity<?> searchKeyword(@RequestParam String keyword, @RequestParam(defaultValue = "1") Long cursor) throws ExecutionException, InterruptedException {
         log.debug("+---------------------------------------------+");
         log.debug("|               새로운 검색 요청               |");
         log.debug("+---------------------------------------------+");
@@ -36,8 +39,8 @@ public class SearchController {
         NaverSearchResponse searchResponse = naverSearcher.search(request);
 
         log.debug("네이버 검색 완료, 포스트 분석 시작 | " + keyword + " | " + cursor);
-        AnalyzeResponse responses = postAnalyzer.analyze(searchResponse);
+        CompletableFuture<AnalyzeResponse> responses = postAnalyzer.analyze(searchResponse);
 
-        return ResponseEntity.ok().body(Response.success(responses));
+        return ResponseEntity.ok().body(Response.success(responses.get()));
     }
 }

@@ -8,6 +8,8 @@ import com.see.realview._core.exception.server.ServerException;
 import com.see.realview._core.response.ErrorData;
 import com.see.realview._core.response.Response;
 import com.see.realview._core.response.ResponseData;
+import jakarta.mail.MessagingException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -15,9 +17,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     private static ResponseEntity<? extends ResponseData<?>> createExceptionResponseData(CustomException exception) {
@@ -63,9 +69,32 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseData, status);
     }
 
+    @ExceptionHandler({ MessagingException.class,
+                        UnsupportedEncodingException.class })
+    public ResponseEntity<?> reportProcessException(Exception exception) {
+        log.error("[exception handler]", exception);
+        CustomException customException = new ServerException(ExceptionStatus.EMAIL_CONTENT_CREATE_ERROR);
+        return createExceptionResponseData(customException);
+    }
+
+    @ExceptionHandler({ ExecutionException.class,
+                        InterruptedException.class })
+    public ResponseEntity<?> executionException(Exception exception) {
+        log.error("[exception handler]", exception);
+        CustomException customException = new ServerException(ExceptionStatus.THREAD_EXECUTION_ERROR);
+        return createExceptionResponseData(customException);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<?> ioException(IOException exception) {
+        log.error("[exception handler]", exception);
+        CustomException customException = new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
+        return createExceptionResponseData(customException);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> exception(Exception exception) {
-        exception.printStackTrace();
+        log.error("[exception handler]", exception);
         CustomException customException = new ServerException(ExceptionStatus.INTERNAL_SERVER_ERROR);
         return createExceptionResponseData(customException);
     }
