@@ -8,10 +8,12 @@ import com.see.realview.search.dto.response.NaverSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -26,14 +28,15 @@ public class NaverSearcher {
         this.naverWebClient = naverWebClient;
     }
 
-    public NaverSearchResponse search(KeywordSearchRequest request) {
+    @Async
+    public CompletableFuture<NaverSearchResponse> search(KeywordSearchRequest request) {
         if (request.keyword().isEmpty()) {
             log.debug("keyword 누락");
             throw new BadRequestException(ExceptionStatus.KEYWORD_IS_EMPTY);
         }
 
-        return getSearchResponse(request)
-                .orElseThrow(() -> new ServerException(ExceptionStatus.NAVER_SEARCH_ERROR));
+        return CompletableFuture.completedFuture(getSearchResponse(request)
+                .orElseThrow(() -> new ServerException(ExceptionStatus.NAVER_SEARCH_ERROR)));
     }
 
     private Optional<NaverSearchResponse> getSearchResponse(KeywordSearchRequest request) {
