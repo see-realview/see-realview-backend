@@ -64,9 +64,9 @@ public class PostAnalyzer {
                 .stream()
                 .map(request -> CompletableFuture.runAsync(() -> analyze(result, imageMap, imageParseRequests, request)))
                 .toList();
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
 
-        log.debug("HTML 파싱 완료. Vision API 요청 작업 시작");
+        log.debug("포스트 분석 완료. Vision API 요청 작업 시작");
         List<String> visionResponse = googleVisionAPI.call(imageParseRequests);
 
         log.debug("Vision API 작업 완료. 파싱 결과 병합 시작");
@@ -163,7 +163,11 @@ public class PostAnalyzer {
         imageParseRequests.forEach(request -> {
             String text = visionResponseQueue.poll();
             boolean advertisement = textAnalyzer.analyzeImageText(text);
-            log.debug(request.imageLink() + " | " + text + " | " + advertisement);
+            log.debug("Vision API 응답 결과\n" +
+                    "Post Link: " + request.postLink() + "\n" +
+                    "Image Link: " + request.imageLink() + "\n" +
+                    "Text: " + text + "\n" +
+                    "advertisement: " + advertisement);
 
             result.put(request.postLink(), advertisement);
 
