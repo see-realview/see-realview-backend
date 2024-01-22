@@ -6,7 +6,7 @@ import com.see.realview._core.exception.client.UnauthorizedException;
 import com.see.realview._core.security.CorsConfig;
 import com.see.realview._core.security.CustomSecurityFilterManager;
 import com.see.realview._core.security.JwtProvider;
-import com.see.realview._core.utils.ExceptionResponseWriter;
+import com.see.realview._core.exception.ExceptionResponseWriter;
 import com.see.realview.token.service.TokenService;
 import com.see.realview.token.service.TokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

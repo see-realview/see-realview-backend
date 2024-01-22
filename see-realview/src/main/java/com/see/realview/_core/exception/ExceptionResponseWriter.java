@@ -1,4 +1,4 @@
-package com.see.realview._core.utils;
+package com.see.realview._core.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.see.realview._core.exception.CustomException;
