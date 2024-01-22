@@ -4,6 +4,7 @@ server:
       charset: utf-8
       force: true
   port: 8080
+  shutdown: graceful
 
 spring:
   devtools:
