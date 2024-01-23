@@ -93,7 +93,7 @@ public class ImageServiceImpl implements ImageService {
         imageRepository
                 .findCachingImages()
                 .forEach(image -> {
-                    ImageData imageData = new ImageData(image.getAdvertisement(), image.getCount());
+                    ImageData imageData = new ImageData(image.getAdvertisement(), 0L);
                     CachedImage cachedImage = new CachedImage(image.getLink(), imageData);
 
                     imageRedisRepository.save(cachedImage);

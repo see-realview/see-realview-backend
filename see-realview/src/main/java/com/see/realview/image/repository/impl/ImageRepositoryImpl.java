@@ -1,5 +1,10 @@
 package com.see.realview.image.repository.impl;
 
+import com.querydsl.core.types.CollectionExpression;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.see.realview.image.entity.Image;
 import com.see.realview.image.entity.QImage;
@@ -13,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class ImageRepositoryImpl implements ImageRepository {
@@ -41,6 +47,10 @@ public class ImageRepositoryImpl implements ImageRepository {
 
     @Override
     public List<Image> findAllByUrlIn(List<String> urls) {
+        if (urls.isEmpty()) {
+            return List.of();
+        }
+
         return jpaQueryFactory
                 .selectFrom(TABLE)
                 .where(TABLE.link.in(urls))
