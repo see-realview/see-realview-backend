@@ -1,7 +1,5 @@
 package com.see.realview.search.service;
 
-import com.see.realview._core.exception.ExceptionStatus;
-import com.see.realview._core.exception.server.ServerException;
 import com.see.realview._core.utils.ImageDownloader;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestImage;
@@ -14,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -62,16 +60,19 @@ public class RequestConverter {
                 .toList();
     }
 
+    public RequestIterator processRequest(ImageParseRequest request, List<RequestFeature> features, int idx) {
+        RequestImage image = new RequestImage(imageDownloader.getEncodedImageFromURL(request.imageLink()));
+        RequestItem item = new RequestItem(image, features);
+        return new RequestIterator(item, idx);
+    }
+
     public List<RequestIterator> getRequestIterators(List<ImageParseRequest> requests, List<RequestFeature> features) {
-        return IntStream
-                .range(0, requests.size())
-                .parallel()
-                .mapToObj(idx -> {
-                    ImageParseRequest request = requests.get(idx);
-                    RequestImage image = new RequestImage(imageDownloader.getEncodedImageFromURL(request.imageLink()));
-                    RequestItem item = new RequestItem(image, features);
-                    return new RequestIterator(item, idx);
-                })
+        List<CompletableFuture<RequestIterator>> futures = IntStream.range(0, requests.size())
+                .mapToObj(idx -> CompletableFuture.supplyAsync(() -> processRequest(requests.get(idx), features, idx)))
+                .toList();
+
+        return futures.stream()
+                .map(CompletableFuture::join)
                 .toList();
     }
 
