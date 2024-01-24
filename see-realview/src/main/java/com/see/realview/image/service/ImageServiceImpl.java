@@ -79,12 +79,18 @@ public class ImageServiceImpl implements ImageService {
         List<Image> images = imageRepository.findAllByUrlIn(urls);
 
         log.debug("데이터베이스 조회 완료. Redis -> DB 이동 시작");
+        List<Image> updatedImages = new ArrayList<>();
         cachedImages
                 .forEach(image -> {
-                    Image saved = findParsedImage(images, image);
-                    saved.updateCount(image.data().count());
+                    if (image.data().count() == 0L) {
+                        return;
+                    }
+
+                    Image saved = findImage(images, image);
+                    saved.addCount(image.data().count());
+                    updatedImages.add(saved);
                 });
-        imageRepository.saveAll(images);
+        imageRepository.saveAll(updatedImages);
 
         log.debug("Redis 데이터 이동 완료. Redis 데이터 삭제 시작.");
         imageRedisRepository.deleteAll();
@@ -102,17 +108,13 @@ public class ImageServiceImpl implements ImageService {
         log.debug("DB 데이터 이동 완료. rebase 완료");
     }
 
-    private static Image findParsedImage(List<Image> images, CachedImage image) {
+    private static Image findImage(List<Image> images, CachedImage image) {
         return images
                 .stream()
                 .filter(img -> img.getLink().equals(image.link()))
                 .findFirst()
                 .orElseGet(() -> {
-                    Image newImage = Image.builder()
-                            .link(image.link())
-                            .advertisement(image.data().advertisement())
-                            .build();
-
+                    Image newImage = Image.of(image.link(), image.data().advertisement());
                     images.add(newImage);
                     return newImage;
                 });

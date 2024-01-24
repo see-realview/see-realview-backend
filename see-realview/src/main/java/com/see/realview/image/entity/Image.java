@@ -45,7 +45,7 @@ public class Image {
                 .build();
     }
 
-    public void updateCount(Long count) {
-        this.count = count;
+    public void addCount(Long count) {
+        this.count += count;
     }
 }
