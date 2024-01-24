@@ -202,6 +202,7 @@ public class PostAnalyzer {
     private Boolean isValidAnalyzableImage(String url) {
         return !url.contains("static.map")
                 && !url.contains("dthumb-phinf.pstatic.net")
-                && !url.contains(".gif");
+                && !url.contains(".gif")
+                && !url.contains("maps.googleapis.com/maps/");
     }
 }
