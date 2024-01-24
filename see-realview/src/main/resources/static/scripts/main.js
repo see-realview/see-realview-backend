@@ -40,7 +40,7 @@ window.addEventListener('scroll', function () {
 
 
 function searchApiRequest(keyword, cursor) {
-    if (keyword !== null || keyword === "" || cursor == null) {
+    if (keyword == null || keyword === "" || cursor == null) {
         return;
     }
 
