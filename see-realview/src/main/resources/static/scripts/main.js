@@ -40,12 +40,23 @@ window.addEventListener('scroll', function () {
 
 
 function searchApiRequest(keyword, cursor) {
+    if (keyword !== null || keyword === "" || cursor == null) {
+        return;
+    }
+
     const apiUrl = `/api/search?keyword=${keyword}&cursor=${cursor}`;
 
     fetch(apiUrl, {
         method: 'GET',
     })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 500) {
+                alert("서버에서 에러가 발생했습니다. \n빠른 시일 내에 고치겠습니다. \n불편을 드려 죄송합니다.");
+                sendBugReport(keyword, cursor);
+            }
+
+            return response.json();
+        })
         .then(data => {
             updateSearchResults(data);
             loading = false;
@@ -53,6 +64,35 @@ function searchApiRequest(keyword, cursor) {
         .catch(error => {
             console.error('Error during API request:', error);
             loading = false;
+        });
+}
+
+function sendBugReport(keyword, cursor) {
+    const bugReport = {
+        title: "검색 오류 발생",
+        content: "keyword: " + keyword + "\ncursor: " + cursor
+    };
+
+    fetch('/api/report/bug', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+        },
+        body: JSON.stringify(bugReport),
+    })
+        .then(response => {
+            if (!response.ok) {
+                alert("리포트 전송 중 오류 발생")
+            }
+
+            return response.json();
+            // TODO: 응답 처리
+        })
+        .then(data => {
+            // TODO: 응답 처리
+        })
+        .catch(error => {
+            // TODO: 버그 발생 시 처리
         });
 }
 

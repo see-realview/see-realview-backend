@@ -16,6 +16,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -57,9 +58,10 @@ public class GlobalExceptionHandler {
         return createExceptionResponseData(exception);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> methodArgumentNotValid(MethodArgumentNotValidException exception) {
-        String message = exception.getAllErrors().get(0).getDefaultMessage();
+    @ExceptionHandler({ MethodArgumentNotValidException.class,
+                        MethodArgumentTypeMismatchException.class })
+    public ResponseEntity<?> methodArgumentNotValid(Exception exception) {
+        String message = exception.getMessage();
         int code = ExceptionStatus.INVALID_METHOD_ARGUMENTS_ERROR.getCode();
 
         ErrorData errorData = new ErrorData(code, message);
