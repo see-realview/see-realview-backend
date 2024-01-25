@@ -1,25 +1,24 @@
 package com.see.realview.search.service;
 
-import com.mysema.commons.lang.Pair;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.search.dto.request.AnalyzeRequest;
-import com.see.realview.search.dto.request.ImageParseRequest;
-import com.see.realview.search.dto.response.AnalyzeResponse;
-import com.see.realview.search.dto.response.PostDTO;
 import com.see.realview.google.service.GoogleVisionAPI;
 import com.see.realview.image.dto.CachedImage;
 import com.see.realview.image.dto.ImageData;
-import com.see.realview.image.service.ParsedImageService;
+import com.see.realview.image.entity.Image;
+import com.see.realview.image.service.ImageService;
+import com.see.realview.search.dto.request.AnalyzeRequest;
+import com.see.realview.search.dto.request.ImageParseRequest;
+import com.see.realview.search.dto.response.AnalyzeResponse;
 import com.see.realview.search.dto.response.NaverSearchResponse;
-import com.see.realview.search.entity.SearchItem;
-import com.see.realview.search.repository.SearchItemRepository;
+import com.see.realview.search.dto.response.PostDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -33,26 +32,23 @@ public class PostAnalyzer {
 
     private final GoogleVisionAPI googleVisionAPI;
 
-    private final ParsedImageService parsedImageService;
-
-    private final SearchItemRepository searchItemRepository;
+    private final ImageService imageService;
 
 
     public PostAnalyzer(@Autowired RequestConverter requestConverter,
                         @Autowired HtmlParser htmlParser,
                         @Autowired TextAnalyzer textAnalyzer,
                         @Autowired GoogleVisionAPI googleVisionAPI,
-                        @Autowired ParsedImageService parsedImageService,
-                        @Autowired SearchItemRepository searchItemRepository) {
+                        @Autowired ImageService imageService) {
         this.requestConverter = requestConverter;
         this.htmlParser = htmlParser;
         this.textAnalyzer = textAnalyzer;
         this.googleVisionAPI = googleVisionAPI;
-        this.parsedImageService = parsedImageService;
-        this.searchItemRepository = searchItemRepository;
+        this.imageService = imageService;
     }
 
-    public AnalyzeResponse analyze(NaverSearchResponse searchResponse) {
+    @Async
+    public CompletableFuture<AnalyzeResponse> analyze(NaverSearchResponse searchResponse) {
         List<AnalyzeRequest> analyzeRequests = requestConverter.createPostAnalyzeRequest(searchResponse);
         Map<String, Boolean> result = new HashMap<>();
         Map<String, List<String>> imageMap = new HashMap<>();
@@ -61,92 +57,16 @@ public class PostAnalyzer {
             result.put(analyzeRequest.link(), false);
         });
 
-
-        // 모델 학습 데이터 저장을 위한 임시 배열
-//        List<Pair<String, String>> texts = new ArrayList<>();
-
         List<ImageParseRequest> imageParseRequests = new ArrayList<>();
 
-        analyzeRequests
+        log.debug("포스트 분석 시작");
+        List<CompletableFuture<Void>> futures = analyzeRequests
                 .stream()
-                .parallel()
-                .forEach(request -> {
-                    Optional<Elements> elements = htmlParser.parse(request);
-                    if (elements.isEmpty()) {
-                        return;
-                    }
+                .map(request -> CompletableFuture.runAsync(() -> analyze(result, imageMap, imageParseRequests, request)))
+                .toList();
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
 
-                    Elements components = elements.get();
-                    Elements images = components.select("img");
-                    String text = components.text();
-                    Boolean advertisement = textAnalyzer.analyzePostText(text);
-//                    texts.add(new Pair<>(request.link(), text));
-
-                    if (images.size() == 0) {
-                        return;
-                    }
-
-                    log.debug("포스트 이미지 데이터 저장 | " + request.link());
-                    List<String> imageUrls = new ArrayList<>();
-                    images.forEach(img -> {
-                        String imageUrl = img.attr("src");
-                        if (!imageUrl.equals("") &&
-                                !imageUrl.contains("storep-phinf.pstatic.net") && //아이콘 제외
-                                !imageUrl.contains("static.map") && // 지도 정보 제외
-                                !imageUrl.contains("dthumb-phinf.pstatic.net") && // 썸네일 사진 제외
-                                !imageUrl.contains(".gif")) { // GIF 파일 제외) {
-                            imageUrls.add(imageUrl.replace("w80_blur", "w966"));
-                        }
-                    });
-                    imageMap.put(request.link(), imageUrls);
-                    log.debug("포스트 이미지 데이터 저장 완료 | " + request.link());
-
-                    if (advertisement) {
-                        log.debug("텍스트에서 광고 확인됨 | " + request.link());
-                        result.put(request.link(), true);
-                        return;
-                    }
-
-                    Element image = images.get(images.size() - 1);
-                    String url = image.attr("src");
-                    if (url.equals("")) {
-                        log.debug("이미지 URL 조회 실패 | " + request.link());
-                        result.put(request.link(), false);
-                        return;
-                    }
-
-                    String rawURL = url.replaceAll("\\?.*$", "");
-                    log.debug("이미지 캐싱 정보 조회 | " + request.link());
-
-                    if (parsedImageService.isWellKnownURL(rawURL)) {
-                        log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
-                        result.put(request.link(), true);
-                        return;
-                    }
-
-                    Optional<CachedImage> cachedImage = parsedImageService.isAlreadyParsedImage(rawURL);
-                    if (cachedImage.isPresent()) {
-                        ImageData cachedData = cachedImage.get().data();
-                        log.debug("이미지 캐싱 정보 확인됨 | " + request.link());
-                        result.put(request.link(), cachedData.advertisement());
-                        return;
-                    }
-
-                    log.debug("이미지 캐싱 정보 없음 | " + request.link());
-
-                    if (url.contains("static.map") || // 지도 정보 제외
-                            url.contains("dthumb-phinf.pstatic.net") || // 썸네일 사진 제외
-                            url.contains(".gif")) { // GIF 파일 제외
-                        result.put(request.link(), false);
-                        return;
-                    }
-
-                    imageParseRequests.add(
-                            new ImageParseRequest(request.link(), url)
-                    );
-                });
-
-        log.debug("HTML 파싱 완료. Vision API 요청 작업 시작");
+        log.debug("포스트 분석 완료. Vision API 요청 작업 시작");
         List<String> visionResponse = googleVisionAPI.call(imageParseRequests);
 
         log.debug("Vision API 작업 완료. 파싱 결과 병합 시작");
@@ -157,28 +77,107 @@ public class PostAnalyzer {
 
         log.debug("응답 완료");
         Long cursor = searchResponse.start() + responses.size();
-        return new AnalyzeResponse(cursor, responses);
+        return CompletableFuture.completedFuture(new AnalyzeResponse(cursor, responses));
     }
 
 
+    private void analyze(Map<String, Boolean> result, Map<String, List<String>> imageMap, List<ImageParseRequest> imageParseRequests, AnalyzeRequest request) {
+        Optional<Elements> elements = htmlParser.parse(request);
+        if (elements.isEmpty()) {
+            return;
+        }
+
+        Elements components = elements.get();
+        Elements images = components.select("img");
+        String text = components.text();
+        Boolean advertisement;
+
+        if (images.size() == 0) {
+            return;
+        }
+
+        log.debug("포스트 이미지 데이터 저장 | " + request.link());
+        List<String> imageUrls = getPostImageData(images);
+        imageMap.put(request.link(), imageUrls);
+
+        advertisement = imageUrls.stream().anyMatch(imageService::isWellKnownURL);
+        if (advertisement) {
+            log.debug("이미지에서 광고 확인됨 | " + request.link());
+            result.put(request.link(), true);
+            return;
+        }
+
+        advertisement = textAnalyzer.analyzePostText(text);
+        if (advertisement) {
+            log.debug("텍스트에서 광고 확인됨 | " + request.link());
+            result.put(request.link(), true);
+            return;
+        }
+
+        Element image = findLastAnalyzableImage(images);
+        String url = image.attr("src");
+        if (url.equals("")) {
+            log.debug("이미지 URL 조회 실패 | " + request.link());
+            result.put(request.link(), false);
+            return;
+        }
+
+        String rawURL = url.replaceAll("\\?.*$", "");
+        Optional<CachedImage> cachedImage = imageService.isAlreadyParsedImage(rawURL);
+        if (cachedImage.isPresent()) {
+            ImageData cachedData = cachedImage.get().data();
+            log.debug("이미지 캐싱 정보 확인됨 | " + request.link() + " | " + cachedData.advertisement());
+            result.put(request.link(), cachedData.advertisement());
+            return;
+        }
+
+        log.debug("Vision API 요청 생성 | " + request.link());
+        imageParseRequests.add(
+                new ImageParseRequest(request.link(), url)
+        );
+    }
+
+    private Element findLastAnalyzableImage(Elements images) {
+        return images
+                .stream()
+                .filter(image -> isValidAnalyzableImage(image.attr("src")))
+                .reduce((first, second) -> second)
+                .orElse(null);
+    }
+
+    private List<String> getPostImageData(Elements images) {
+        List<String> imageUrls = new ArrayList<>();
+        images.forEach(img -> {
+            String imageUrl = img.attr("src").replace("w80_blur", "w966");
+            if (isValidPostImage(imageUrl)) {
+                imageUrls.add(imageUrl);
+            }
+        });
+        return imageUrls;
+    }
+
     private void mergeVisionAPIResults(Map<String, Boolean> result, List<ImageParseRequest> imageParseRequests, List<String> visionResponse) {
         Queue<String> visionResponseQueue = new LinkedList<>(visionResponse);
-        List<ParsedImage> images = new ArrayList<>();
+        List<Image> images = new ArrayList<>();
 
         imageParseRequests.forEach(request -> {
             String text = visionResponseQueue.poll();
             boolean advertisement = textAnalyzer.analyzeImageText(text);
-            log.debug(request.imageLink() + " | " + text + " | " + advertisement);
+            log.debug("Vision API 응답 결과\n" +
+                    "Post Link: " + request.postLink() + "\n" +
+                    "Image Link: " + request.imageLink() + "\n" +
+                    "Text: " + text + "\n" +
+                    "advertisement: " + advertisement);
 
             result.put(request.postLink(), advertisement);
 
             String url = request.imageLink();
             String rawURL = url.replaceAll("\\?.*$", "");
-            images.add(ParsedImage.of(rawURL, advertisement));
+            images.add(Image.of(rawURL, advertisement));
         });
 
         log.debug("병합 완료. Vision API 결과 저장 요청");
-        parsedImageService.saveAll(images);
+        imageService.saveAll(images);
         log.debug("Vision API 결과 저장 완료");
     }
 
@@ -194,19 +193,16 @@ public class PostAnalyzer {
                 .toList();
     }
 
-    private void savePost(List<Pair<String, String>> texts, List<PostDTO> responses) {
-        List<SearchItem> searchItems = responses
-                .stream()
-                .map(postDTO -> {
-                    String text = texts
-                            .stream()
-                            .filter(iter -> iter.getFirst().equals(postDTO.link()))
-                            .findFirst().orElseThrow()
-                            .getSecond();
+    private Boolean isValidPostImage(String url) {
+        return !url.equals("")
+                && !url.contains("storep-phinf.pstatic.net")
+                && isValidAnalyzableImage(url);
+    }
 
-                    return SearchItem.of(postDTO, text);
-                })
-                .toList();
-        searchItemRepository.saveAll(searchItems);
+    private Boolean isValidAnalyzableImage(String url) {
+        return !url.contains("static.map")
+                && !url.contains("dthumb-phinf.pstatic.net")
+                && !url.contains(".gif")
+                && !url.contains("maps.googleapis.com/maps/");
     }
 }

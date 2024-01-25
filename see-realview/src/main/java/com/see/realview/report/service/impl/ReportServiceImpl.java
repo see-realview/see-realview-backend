@@ -35,21 +35,16 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public void send(ReportType type, ReportRequest request) {
-        try {
-            String reportTitle = type.toString() + " " + request.title();
-            MimeMessage message = javaMailSender.createMimeMessage();
-            String content = replaceExpletives(request.content());
+    public void send(ReportType type, ReportRequest request) throws MessagingException, UnsupportedEncodingException {
+        String reportTitle = type.toString() + " " + request.title();
+        MimeMessage message = javaMailSender.createMimeMessage();
+        String content = replaceExpletives(request.content());
 
-            message.setFrom(new InternetAddress(SENDER, "see-realview"));
-            message.addRecipients(Message.RecipientType.TO, RECEIVER);
-            message.setSubject(reportTitle);
-            message.setText(content, "utf-8", "text");
-            javaMailSender.send(message);
-        }
-        catch (MessagingException | UnsupportedEncodingException exception) {
-            throw new ServerException(ExceptionStatus.EMAIL_CONTENT_CREATE_ERROR);
-        }
+        message.setFrom(new InternetAddress(SENDER, "see-realview"));
+        message.addRecipients(Message.RecipientType.TO, RECEIVER);
+        message.setSubject(reportTitle);
+        message.setText(content, "utf-8", "text");
+        javaMailSender.send(message);
     }
 
     @Override

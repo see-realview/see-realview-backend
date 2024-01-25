@@ -71,4 +71,13 @@ public class WebClientConfig {
             throw new ServerException(ExceptionStatus.IMAGE_PARSING_ERROR);
         }
     }
+
+    @Bean(name = "databaseWebClient")
+    public WebClient databaseWebClient() {
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(clientCodecConfigurer -> clientCodecConfigurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024))
+                        .build())
+                .build();
+    }
 }

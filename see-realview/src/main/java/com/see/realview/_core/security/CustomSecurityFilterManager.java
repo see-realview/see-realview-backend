@@ -1,6 +1,6 @@
 package com.see.realview._core.security;
 
-import com.see.realview._core.utils.ExceptionResponseWriter;
+import com.see.realview._core.exception.ExceptionResponseWriter;
 import com.see.realview.token.service.TokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

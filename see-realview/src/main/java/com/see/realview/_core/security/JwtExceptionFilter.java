@@ -4,7 +4,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.client.UnauthorizedException;
-import com.see.realview._core.utils.ExceptionResponseWriter;
+import com.see.realview._core.exception.ExceptionResponseWriter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

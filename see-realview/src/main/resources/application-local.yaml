@@ -4,13 +4,14 @@ server:
       charset: utf-8
       force: true
   port: 8080
+  shutdown: graceful
 
 spring:
   devtools:
     livereload:
       enabled: true
   datasource:
-    url: jdbc:mysql://localhost:3306/see-realview
+    url: jdbc:mysql://localhost:3306/see-realview?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useLegacyDatetimeCode=false
     driver-class-name: com.mysql.cj.jdbc.Driver
 #    url: jdbc:h2:mem:test;MODE=MySQL
 #    driver-class-name: org.h2.Driver
@@ -21,7 +22,7 @@ spring:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -41,3 +42,5 @@ logging:
   level:
     '[com.see.realview]': DEBUG
     '[org.hibernate.type]': TRACE
+  pattern:
+    dateformat: yyyy-MM-dd | HH:mm:ss.SSS |, Asia/Seoul
