@@ -5,16 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.see.realview._core.exception.ExceptionStatus;
 import com.see.realview._core.exception.server.ServerException;
-import com.see.realview.google.dto.RequestIterator;
-import com.see.realview.search.dto.request.ImageParseRequest;
-import com.see.realview.search.dto.response.PostDTO;
-import com.see.realview.search.service.RequestConverter;
-import com.see.realview.search.service.TextAnalyzer;
 import com.see.realview.google.dto.RequestFeature;
 import com.see.realview.google.dto.RequestItem;
+import com.see.realview.google.dto.RequestIterator;
 import com.see.realview.google.dto.VisionRequest;
-import com.see.realview.image.entity.ParsedImage;
-import com.see.realview.image.service.ParsedImageService;
+import com.see.realview.search.dto.request.ImageParseRequest;
+import com.see.realview.search.service.RequestConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,7 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j

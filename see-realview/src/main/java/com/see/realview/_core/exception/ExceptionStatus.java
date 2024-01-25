@@ -13,6 +13,7 @@ public enum ExceptionStatus {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 1002, "서버에서 알 수 없는 에러가 발생했습니다."),
     DATA_CONVERSION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 1003, "데이터 변환 과정에서 오류가 발생했습니다."),
     INVALID_METHOD_ARGUMENTS_ERROR(HttpStatus.BAD_REQUEST, 1004, ""),
+    THREAD_EXECUTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 1005, "서버에서 알 수 없는 에러가 발생했습니다."),
 
     // 유저 에러 2000번
     EMAIL_ALREADY_EXIST(HttpStatus.BAD_REQUEST, 2000, "이미 존재하는 이메일입니다."),

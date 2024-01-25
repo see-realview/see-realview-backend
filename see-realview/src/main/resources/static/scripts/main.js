@@ -24,7 +24,7 @@ window.addEventListener('scroll', function () {
     const scrollTop = document.documentElement.scrollTop;
     const clientHeight = document.documentElement.clientHeight;
 
-    if (scrollHeight - scrollTop - 1000 <= clientHeight && !loading) {
+    if (scrollHeight - scrollTop - 2000 <= clientHeight && !loading) {
         const keyword = document.getElementById('search-input').value;
         const cursor = localStorage.getItem("cursor");
 
@@ -40,12 +40,23 @@ window.addEventListener('scroll', function () {
 
 
 function searchApiRequest(keyword, cursor) {
+    if (keyword == null || keyword === "" || cursor == null) {
+        return;
+    }
+
     const apiUrl = `/api/search?keyword=${keyword}&cursor=${cursor}`;
 
     fetch(apiUrl, {
         method: 'GET',
     })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 500) {
+                alert("서버에서 에러가 발생했습니다. \n빠른 시일 내에 고치겠습니다. \n불편을 드려 죄송합니다.");
+                sendBugReport(keyword, cursor);
+            }
+
+            return response.json();
+        })
         .then(data => {
             updateSearchResults(data);
             loading = false;
@@ -53,6 +64,35 @@ function searchApiRequest(keyword, cursor) {
         .catch(error => {
             console.error('Error during API request:', error);
             loading = false;
+        });
+}
+
+function sendBugReport(keyword, cursor) {
+    const bugReport = {
+        title: "검색 오류 발생",
+        content: "keyword: " + keyword + "\ncursor: " + cursor
+    };
+
+    fetch('/api/report/bug', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+        },
+        body: JSON.stringify(bugReport),
+    })
+        .then(response => {
+            if (!response.ok) {
+                alert("리포트 전송 중 오류 발생")
+            }
+
+            return response.json();
+            // TODO: 응답 처리
+        })
+        .then(data => {
+            // TODO: 응답 처리
+        })
+        .catch(error => {
+            // TODO: 버그 발생 시 처리
         });
 }
 
@@ -65,10 +105,55 @@ function updateSearchResults(responseData) {
             const listItem = document.createElement('div');
             listItem.classList.add('search-result');
 
-            var link = document.createElement('a');
-            link.href = item.link;
-            link.target = '_blank';
+            const imagesContainer = document.createElement('div');
+            imagesContainer.classList.add('images-container');
+
+            // const leftArrow = document.createElement('button');
+            // leftArrow.innerHTML = '&#9665;';
+            // leftArrow.classList.add('arrow-button', 'left-arrow');
+            //
+            // const rightArrow = document.createElement('button');
+            // rightArrow.innerHTML = '&#9655;';
+            // rightArrow.classList.add('arrow-button', 'right-arrow');
+            //
+            // leftArrow.addEventListener('click', function () {
+            //     imagesContainer.scrollBy({
+            //         left: -500,
+            //         behavior: 'smooth'
+            //     });
+            // });
+            //
+            // rightArrow.addEventListener('click', function () {
+            //     imagesContainer.scrollBy({
+            //         left: 500,
+            //         behavior: 'smooth'
+            //     });
+            // });
+            //
+            // listItem.appendChild(leftArrow);
+            // listItem.appendChild(rightArrow);
+
+            if (item.images != null) {
+                item.images.forEach(function (imageUrl) {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = imageUrl;
+                    imgElement.setAttribute('referrerpolicy', 'no-referrer');
+                    imgElement.setAttribute("loading", "lazy");
+                    imagesContainer.appendChild(imgElement);
+                });
+
+                listItem.appendChild(imagesContainer);
+                searchContainer.appendChild(listItem);
+            }
+
+            const postContent = document.createElement('a');
+            postContent.href = item.link;
+            postContent.target = '_blank';
+            postContent.classList.add('post-content');
+
+            var link = document.createElement('div');
             link.innerHTML = item.title;
+            link.classList.add('post-title');
 
             const description = document.createElement('p');
             description.innerHTML = item.description;
@@ -81,10 +166,11 @@ function updateSearchResults(responseData) {
             dateElement.classList.add('date');
             dateElement.textContent = item.bloggerName + " | " + item.date;
 
-            listItem.appendChild(advertisementElement);
-            listItem.appendChild(link);
-            listItem.appendChild(description);
-            listItem.appendChild(dateElement);
+            postContent.appendChild(advertisementElement);
+            postContent.appendChild(link);
+            postContent.appendChild(description);
+            postContent.appendChild(dateElement);
+            listItem.appendChild(postContent);
             searchContainer.appendChild(listItem);
         });
     } else {

@@ -5,7 +5,18 @@
 </br>
 
 ## 변경 로그 요약
-- 업데이트 예정
+### v1.2
+- 포스트 이미지 미리보기 기능 구현
+- 타임리프 템플릿 스타일 수정
+- 코드 리팩터링
+
+### v1.1
+- 이미지 분석 결과를 캐싱하는 과정이 정상적으로 작동하지 않는 오류 수정
+
+### v1.0
+- MVP 구현 완료 (키워드 검색 및 포스트 분석)
+- 버그 리포트 기능 구현
+- 이미지 분석 결과 캐시 구현
 
 </br>
 
@@ -37,6 +48,9 @@
 > - GMAIL_PASSWORD
 > - REPORT_RECEIVER_EMAIL
 > - REDIS_HOST
+> - IMAGE_CACHE_SIZE
+> - IMAGE_CACHE_EXPIRE
+> - IMAGE_CACHE_SCHEDULE
 
 1. clone project
 ```
@@ -55,16 +69,6 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 
 </br>
 
-## 기본 사용 예시
-- 업데이트 예정
-
-</br>
-
-## 문제 해결 단계
-- 업데이트 예정
-
-</br>
-
 ## 심화 자료와 문서 링크
 - 업데이트 예정
 
@@ -79,6 +83,8 @@ $ java -jar see-realview-0.0.1-SNAPSHOT.jar
 - 2024.01.10 : 타임리프를 이용한 페이지 템플릿 추가 [#26](https://github.com/see-realview/see-realview-backend/issues/26)
 - 2024.01.10 : 버그 리포트 기능 구현 [#28](https://github.com/see-realview/see-realview-backend/issues/28)
 - 2024.01.10 : MVP 구현 완료 및 배포 [#30](https://github.com/see-realview/see-realview-backend/issues/30)
+- 2024.01.14 : 이미지 분석 결과 캐싱 오류 수정 [#32](https://github.com/see-realview/see-realview-backend/issues/32)
+- 2024.01.15 : 포스트 이미지 미리보기 구현 [#36](https://github.com/see-realview/see-realview-backend/pull/36)
 
 </br>
 
